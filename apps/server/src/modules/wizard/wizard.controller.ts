@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   ParseIntPipe,
   Patch,
@@ -11,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/jwt-auth.guard';
-import { Draft, WizardService } from './wizard.service';
+import { Draft, DraftReferenceItem, WizardService } from './wizard.service';
 
 interface AuthedRequest extends Request {
   user?: { id: string };
@@ -50,9 +51,31 @@ export class WizardController {
   }
 
   @Delete(':id')
+  @HttpCode(204)
   async remove(@Req() req: AuthedRequest, @Param('id') id: string): Promise<void> {
     const userId = this.getUserId(req);
     await this.wizardService.softDeleteDraft(userId, id);
+  }
+
+  @Post(':id/references')
+  async addReference(
+    @Req() req: AuthedRequest,
+    @Param('id') id: string,
+    @Body() body: DraftReferenceItem,
+  ): Promise<Draft> {
+    const userId = this.getUserId(req);
+    return this.wizardService.addReference(userId, id, body);
+  }
+
+  @Delete(':id/references/:refId')
+  @HttpCode(200)
+  async removeReference(
+    @Req() req: AuthedRequest,
+    @Param('id') id: string,
+    @Param('refId') refId: string,
+  ): Promise<Draft> {
+    const userId = this.getUserId(req);
+    return this.wizardService.removeReference(userId, id, refId);
   }
 }
 

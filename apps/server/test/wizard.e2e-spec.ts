@@ -75,7 +75,7 @@ describe('WizardModule / Drafts (e2e)', () => {
     await request(server)
       .delete(`/api/drafts/${draftId}`)
       .set('Authorization', `Bearer ${token}`)
-      .expect(200);
+      .expect(204);
 
     const listAfterDelete = await request(server)
       .get('/api/drafts')

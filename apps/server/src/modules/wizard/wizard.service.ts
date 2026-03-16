@@ -1,4 +1,15 @@
 import { Injectable } from '@nestjs/common';
+import { ReferenceSource } from '../../../../../packages/shared/src/enums';
+
+export interface DraftReferenceItem {
+  id: string;
+  source: ReferenceSource;
+  title: string;
+  authors: string[];
+  journal?: string;
+  year?: number;
+  raw_citation?: string;
+}
 
 export interface DraftStepData {
   step1_data?: Record<string, unknown>;
@@ -82,6 +93,56 @@ export class WizardService {
     draft.deleted_at = new Date();
     draft.updated_at = new Date();
     this.drafts.set(draftId, draft);
+  }
+
+  /** 向草稿的 step2_data.references 追加一条文�?*/
+  async addReference(
+    userId: string,
+    draftId: string,
+    ref: DraftReferenceItem,
+  ): Promise<Draft> {
+    const draft = this.drafts.get(draftId);
+    if (!draft || draft.user_id !== userId || draft.deleted_at) {
+      throw new Error('Draft not found');
+    }
+
+    const step2 = (draft.step2_data ?? {}) as Record<string, unknown>;
+    const refs = Array.isArray(step2['references'])
+      ? (step2['references'] as DraftReferenceItem[])
+      : [];
+
+    const next: Draft = {
+      ...draft,
+      step2_data: { ...step2, references: [...refs, ref] },
+      updated_at: new Date(),
+    };
+    this.drafts.set(draftId, next);
+    return next;
+  }
+
+  /** 从草稿的 step2_data.references 中移除一条文�?*/
+  async removeReference(
+    userId: string,
+    draftId: string,
+    refId: string,
+  ): Promise<Draft> {
+    const draft = this.drafts.get(draftId);
+    if (!draft || draft.user_id !== userId || draft.deleted_at) {
+      throw new Error('Draft not found');
+    }
+
+    const step2 = (draft.step2_data ?? {}) as Record<string, unknown>;
+    const refs = Array.isArray(step2['references'])
+      ? (step2['references'] as DraftReferenceItem[])
+      : [];
+
+    const next: Draft = {
+      ...draft,
+      step2_data: { ...step2, references: refs.filter((r) => r.id !== refId) },
+      updated_at: new Date(),
+    };
+    this.drafts.set(draftId, next);
+    return next;
   }
 }
 

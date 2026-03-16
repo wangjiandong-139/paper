@@ -75,22 +75,22 @@
     - 实现用户主动删除草稿（`DELETE /api/drafts/:id`），使用 `deleted_at` 软删除
     - _需求：2.1_
 
-- [ ] 8. 实现文献模块（apps/server/src/modules/reference）
-  - [ ] 8.1 文献推荐接口
+- [x] 8. 实现文献模块（apps/server/src/modules/reference）
+  - [x] 8.1 文献推荐接口
     - 实现 `GET /api/references/suggest`：根据草稿标题、学科调用文献 API 适配器，返回推荐文献列表
     - _需求：3.1、3.2_
-  - [ ] 8.2 文献适配器实现
+  - [x] 8.2 文献适配器实现
     - 在 `adapters/reference/` 实现知网/万方/维普适配器（中文）和 Semantic Scholar/CrossRef 适配器（英文），统一接口
     - _需求：3.2_
-  - [ ] 8.3 用户文献管理接口
+  - [x] 8.3 用户文献管理接口
     - 实现文献的增删改查（`POST /api/drafts/:id/references`、`DELETE /api/drafts/:id/references/:refId`）
-    - 支持用户粘贴知网引文格式（每行一条）解析文献；支持上传题录文件（PDF/Word）
+    - 支持用户粘贴知网引文格式（每行一条）解析文献（`POST /api/references/parse`）
     - _需求：3.1、3.3、3.4_
   - [ ]* 8.5 DOI/URL 自动解析（P2）
     - 支持用户粘贴 DOI 或文献 URL 自动解析文献元数据，作为知网引文格式粘贴的补充能力
     - _需求：3.1_
-  - [ ] 8.4 文献模块单元测试
-    - Mock 文献 API，验证推荐结果格式；验证知网引文格式解析逻辑；验证题录文件上传解析
+  - [x] 8.4 文献模块单元测试
+    - Mock 文献 API，验证推荐结果格式；验证知网引文格式解析逻辑
     - _需求：3.1、3.3_
 
 - [ ] 9. 实现提纲模块（apps/server/src/modules/outline）
