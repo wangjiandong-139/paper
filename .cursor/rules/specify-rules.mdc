@@ -1,0 +1,39 @@
+---
+description: Project Development Guidelines
+globs: ["**/*"]
+alwaysApply: true
+---
+# paper Development Guidelines
+
+Auto-generated from all feature plans. Last updated: 2026-03-16
+
+## Active Technologies
+
+- TypeScript 5.x（前端 Vue 3、后端 NestJS 10） + Vue 3, Vite, Pinia, TailwindCSS, NestJS, Prisma, PostgreSQL, Redis, BullMQ (001-admin-portal)
+
+## Project Structure
+
+```text
+apps/
+├── admin/
+├── web/
+└── server/
+packages/
+└── shared/
+specs/
+```
+
+## Commands
+
+pnpm --filter @ai-paper/server test; pnpm --filter @ai-paper/admin test; pnpm lint
+
+## Code Style
+
+TypeScript 5.x（前端 Vue 3、后端 NestJS 10）: Follow standard conventions
+
+## Recent Changes
+
+- 001-admin-portal: Added TypeScript 5.x（前端 Vue 3、后端 NestJS 10） + Vue 3, Vite, Pinia, TailwindCSS, NestJS, Prisma, PostgreSQL, Redis, BullMQ
+
+<!-- MANUAL ADDITIONS START -->
+<!-- MANUAL ADDITIONS END -->
