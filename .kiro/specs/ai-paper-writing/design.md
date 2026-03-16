@@ -101,6 +101,7 @@ ai-paper-writing/
 │       └── src/
 │           ├── modules/
 │           │   ├── auth/
+│           │   ├── user/
 │           │   ├── wizard/
 │           │   ├── reference/
 │           │   ├── outline/
@@ -631,6 +632,7 @@ Order.ai_revision_count 记录已使用次数
 POST /api/orders/:id/revision/ai 调用前：
   - BASIC 套餐：ai_revision_count >= 3 → 返回 403，提示已达改稿上限
   - 计入次数的操作类型：REWRITE、REDUCE_PLAGIARISM、REDUCE_AI、EXPAND、SHRINK、POLISH
+  - 不计入次数的操作：加图/表（ADD_FIGURE、ADD_TABLE，通过独立接口调用，不经过 revision/ai）
   （后续扩展套餐时在此处添加对应分支）
 ```
 
