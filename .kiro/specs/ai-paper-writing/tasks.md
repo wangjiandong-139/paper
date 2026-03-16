@@ -58,9 +58,9 @@
   - _如有疑问请询问用户（ask the user if questions arise）_
 
 - [ ] 6. 实现用户模块（apps/server/src/modules/user）
-  - 实现 `PATCH /api/users/me`：允许用户更新昵称、头像等个人信息
-  - 实现 `GET /api/users/me`：返回当前登录用户信息
-  - 写单元测试：验证更新成功、未登录返回 401
+  - [x] 实现 `PATCH /api/users/me`：允许用户更新昵称、头像等个人信息
+  - [x] 实现 `GET /api/users/me`：返回当前登录用户信息
+  - [x] 写单元测试：验证更新成功、未登录返回 401
   - _需求：1.2、1.3_
 
 - [ ] 7. 实现草稿模块（apps/server/src/modules/wizard）
