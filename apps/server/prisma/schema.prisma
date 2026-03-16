@@ -7,6 +7,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── Existing Enums ───────────────────────────────────────────────────────────
+
 enum PlanType {
   BASIC
 }
@@ -34,55 +36,140 @@ enum ReferenceSource {
   USER_INPUT
 }
 
-model User {
-  id                  String   @id @default(uuid())
-  wechat_open_id      String   @unique
-  wechat_union_id     String?  @unique
-  nickname            String?
-  avatar_url          String?
-  onboarding_completed Boolean  @default(false)
-  created_at          DateTime @default(now())
-  updated_at          DateTime @updatedAt
-  deleted_at          DateTime?
+// ─── Admin Enums ──────────────────────────────────────────────────────────────
 
-  drafts Draft[]
-  orders Order[]
+enum AdminRole {
+  SUPER_ADMIN
+  OPERATOR
+  CUSTOMER_SERVICE
+  READ_ONLY
+}
+
+enum AdminUserStatus {
+  ACTIVE
+  DISABLED
+  LOCKED
+}
+
+enum GenerationJobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum GenerationJobTriggerSource {
+  SYSTEM
+  MANUAL_RETRY
+}
+
+enum GenerationJobEventType {
+  QUEUED
+  CHAPTER_STARTED
+  CHAPTER_COMPLETED
+  WARNING
+  ERROR
+}
+
+enum SchoolTemplateStatus {
+  ENABLED
+  DISABLED
+}
+
+enum DegreeType {
+  COLLEGE
+  BACHELOR
+  MASTER
+  DOCTOR
+}
+
+enum TemplateRequestStatus {
+  PENDING
+  FULFILLED
+  IGNORED
+}
+
+enum ApiConfigType {
+  PLAGIARISM
+  CITATION_CHECK
+}
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+}
+
+// ─── Existing User-domain Models ──────────────────────────────────────────────
+
+model User {
+  id                   String    @id @default(uuid())
+  wechat_open_id       String    @unique
+  wechat_union_id      String?   @unique
+  nickname             String?
+  avatar_url           String?
+  onboarding_completed Boolean   @default(false)
+  created_at           DateTime  @default(now())
+  updated_at           DateTime  @updatedAt
+  deleted_at           DateTime?
+
+  drafts      Draft[]
+  orders      Order[]
+  riskControl UserRiskControl?
 }
 
 model Draft {
-  id           String   @id @default(uuid())
-  user_id      String
-  current_step Int
-  step1_data   Json
-  step2_data   Json
-  step3_data   Json
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
-  deleted_at   DateTime?
+  id                  String    @id @default(uuid())
+  user_id             String
+  current_step        Int
+  step1_data          Json
+  step2_data          Json
+  step3_data          Json
+  step1_completed_at  DateTime?
+  step2_confirmed_at  DateTime?
+  outline_confirmed_at DateTime?
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  deleted_at          DateTime?
 
   user  User  @relation(fields: [user_id], references: [id])
   order Order?
 }
 
 model Order {
-  id                 String        @id @default(uuid())
-  user_id            String
-  draft_id           String
-  plan_type          PlanType
-  plan_price         Int
-  wechat_pay_order_id String
-  status             OrderStatus
-  generation_progress Json?
-  bullmq_job_id      String?
-  ai_revision_count  Int           @default(0)
-  revision_content   Json?
-  paper_snapshot     Json
-  created_at         DateTime      @default(now())
-  updated_at         DateTime      @updatedAt
+  id                     String      @id @default(uuid())
+  user_id                String
+  draft_id               String      @unique
+  plan_type              PlanType
+  plan_price             Int
+  wechat_pay_order_id    String
+  status                 OrderStatus
+  generation_progress    Json?
+  bullmq_job_id          String?
+  ai_revision_count      Int         @default(0)
+  revision_content       Json?
+  paper_snapshot         Json
+  // Admin portal extended fields
+  title                  String      @default("")
+  product_snapshot_json  Json?
+  product_code_snapshot  String?
+  product_name_snapshot  String?
+  paid_amount_fen        Int?
+  latest_failure_reason  String?
+  note                   String?
+  paid_at                DateTime?
+  generation_started_at  DateTime?
+  generation_completed_at DateTime?
+  failed_at              DateTime?
+  created_at             DateTime    @default(now())
+  updated_at             DateTime    @updatedAt
 
-  user              User             @relation(fields: [user_id], references: [id])
-  draft             Draft            @relation(fields: [draft_id], references: [id])
+  user           User             @relation(fields: [user_id], references: [id])
+  draft          Draft            @relation(fields: [draft_id], references: [id])
   generatedChapters GeneratedChapter[]
+  generationJobs GenerationJob[]
+
+  @@index([status, created_at])
+  @@index([user_id, created_at])
 }
 
 model GeneratedChapter {
@@ -135,3 +222,155 @@ model FormatTemplate {
   deleted_at     DateTime?
 }
 
+// ─── Admin Domain Models ──────────────────────────────────────────────────────
+
+model AdminUser {
+  id                   String          @id @default(uuid())
+  username             String          @unique
+  password_hash        String
+  role                 AdminRole
+  status               AdminUserStatus @default(ACTIVE)
+  failed_login_attempts Int            @default(0)
+  locked_until         DateTime?
+  last_login_at        DateTime?
+  created_at           DateTime        @default(now())
+  updated_at           DateTime        @updatedAt
+
+  operationLogs         OperationLog[]
+  updatedApiConfigs     ApiConfig[]
+  createdTemplates      SchoolTemplate[] @relation("CreatedByAdmin")
+  updatedTemplates      SchoolTemplate[] @relation("UpdatedByAdmin")
+  handledTemplateRequests TemplateRequest[]
+  triggeredGenerationJobs GenerationJob[]
+}
+
+model UserRiskControl {
+  id                      String   @id @default(uuid())
+  user_id                 String   @unique
+  is_disabled             Boolean  @default(false)
+  daily_generation_limit  Int?
+  reason                  String?
+  updated_by_admin_user_id String
+  updated_at              DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model SchoolTemplate {
+  id                        String               @id @default(uuid())
+  school_name               String
+  school_name_normalized    String
+  degree_type               DegreeType
+  template_file_path        String
+  citation_style            String
+  heading_config_json       Json
+  page_layout_json          Json
+  status                    SchoolTemplateStatus @default(ENABLED)
+  created_by_admin_user_id  String
+  updated_by_admin_user_id  String
+  created_at                DateTime             @default(now())
+  updated_at                DateTime             @updatedAt
+
+  createdBy        AdminUser       @relation("CreatedByAdmin", fields: [created_by_admin_user_id], references: [id])
+  updatedBy        AdminUser       @relation("UpdatedByAdmin", fields: [updated_by_admin_user_id], references: [id])
+  templateRequests TemplateRequest[]
+
+  @@unique([school_name_normalized, degree_type])
+}
+
+model TemplateRequest {
+  id                      String                @id @default(uuid())
+  user_id                 String
+  school_name             String
+  degree_type             DegreeType
+  document_path           String?
+  status                  TemplateRequestStatus @default(PENDING)
+  linked_template_id      String?
+  handled_by_admin_user_id String?
+  created_at              DateTime              @default(now())
+  updated_at              DateTime              @updatedAt
+
+  linkedTemplate   SchoolTemplate? @relation(fields: [linked_template_id], references: [id])
+  handledBy        AdminUser?      @relation(fields: [handled_by_admin_user_id], references: [id])
+
+  @@index([status, created_at])
+}
+
+model GenerationJob {
+  id                     String                     @id @default(uuid())
+  order_id               String
+  attempt_no             Int
+  status                 GenerationJobStatus
+  bullmq_job_id          String?
+  trigger_source         GenerationJobTriggerSource @default(SYSTEM)
+  terminal_reason        String?
+  failure_message        String?
+  queued_at              DateTime                   @default(now())
+  started_at             DateTime?
+  finished_at            DateTime?
+  attention_required_at  DateTime?
+  operator_admin_user_id String?
+
+  order         Order                    @relation(fields: [order_id], references: [id])
+  operatorAdmin AdminUser?               @relation(fields: [operator_admin_user_id], references: [id])
+  eventLogs     GenerationJobEventLog[]
+
+  @@unique([order_id, attempt_no])
+  @@index([status, started_at])
+}
+
+model GenerationJobEventLog {
+  id                String                 @id @default(uuid())
+  generation_job_id String
+  chapter_no        Int?
+  event_type        GenerationJobEventType
+  message           String
+  created_at        DateTime               @default(now())
+
+  generationJob GenerationJob @relation(fields: [generation_job_id], references: [id])
+}
+
+model ApiConfig {
+  id                      String        @id @default(uuid())
+  config_type             ApiConfigType @unique
+  provider_name           String
+  base_url                String
+  encrypted_secret        String?
+  rate_limit_config_json  Json?
+  is_enabled              Boolean       @default(true)
+  config_version          Int           @default(1)
+  updated_by_admin_user_id String
+  updated_at              DateTime      @updatedAt
+
+  updatedBy AdminUser @relation(fields: [updated_by_admin_user_id], references: [id])
+}
+
+model OperationLog {
+  id                  String   @id @default(uuid())
+  actor_admin_user_id String
+  action_type         String
+  target_type         String
+  target_id           String
+  summary             String
+  before_json         Json?
+  after_json          Json?
+  created_at          DateTime @default(now())
+
+  actor AdminUser @relation(fields: [actor_admin_user_id], references: [id])
+
+  @@index([created_at, action_type])
+}
+
+model Product {
+  id                String        @id @default(uuid())
+  product_code      String        @unique
+  name              String
+  status            ProductStatus @default(ACTIVE)
+  price_fen         Int
+  revision_limit    Int?
+  ai_rate_threshold Decimal?
+  benefits_json     Json          @default("{}")
+  description       String        @default("")
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt
+}

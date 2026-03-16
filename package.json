@@ -10,7 +10,10 @@
     "lint": "eslint \"**/*.{ts,tsx,js,jsx}\"",
     "format": "prettier --write .",
     "typecheck": "tsc -b",
-    "test": "jest"
+    "test": "jest",
+    "admin:dev": "pnpm --filter @ai-paper/admin dev",
+    "admin:build": "pnpm --filter @ai-paper/admin build",
+    "admin:test": "pnpm --filter @ai-paper/admin test"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",

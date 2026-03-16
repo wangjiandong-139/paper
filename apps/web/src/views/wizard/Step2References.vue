@@ -221,8 +221,9 @@
       position="bottom"
       round
       :style="{ maxHeight: '80vh' }"
+      data-testid="confirm-dialog"
     >
-      <div class="p-4" data-testid="confirm-dialog">
+      <div class="p-4">
         <h3 class="text-base font-semibold text-gray-800 mb-3">确认参考文献列表</h3>
         <p class="text-xs text-gray-500 mb-4">
           以下 {{ count }} 篇文献将作为论文生成的唯一引用来源，确认后不可更改。
@@ -329,6 +330,7 @@ function handleParse(): void {
 function handleAddAll(): void {
   addValidParsedRefs()
   clearParseResult()
+  citationInput.value = ''
   showToast({ message: '已添加到文献列表', position: 'bottom' })
   activeTab.value = 'suggest'
 }

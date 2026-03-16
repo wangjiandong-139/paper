@@ -93,7 +93,6 @@ export function useReferences(options: UseReferencesOptions): UseReferencesRetur
 
   function clearParseResult(): void {
     parseResult.value = null
-    citationInput.value = ''
   }
 
   /**

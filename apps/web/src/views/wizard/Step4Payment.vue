@@ -76,11 +76,14 @@
       <van-button
         round
         block
+        size="large"
         type="primary"
         color="#07c160"
         :disabled="!canPay"
         data-testid="pay-button"
         @click="startPayment"
+        class="!bg-[#07c160] !border-[#07c160] disabled:opacity-50"
+        style="min-height: 48px;"
       >
         立即支付 {{ currentPlanOption?.priceLabel }}
       </van-button>
