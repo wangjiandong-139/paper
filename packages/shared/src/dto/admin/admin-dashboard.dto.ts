@@ -10,11 +10,12 @@ export interface DashboardOverviewDto {
 }
 
 export interface DashboardFunnelDto {
-  step1Count: number
-  step2Count: number
-  outlineConfirmedCount: number
-  paidCount: number
-  completedCount: number
+  step1Count: number        // 进入向导
+  step2Count: number        // 填写题目
+  outlineConfirmedCount: number // 确认大纲
+  paidCount: number         // 支付成功
+  generatingCount: number   // 生成中
+  completedCount: number    // 生成完成
   timeRange: DashboardTimeRange
 }
 

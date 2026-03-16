@@ -22,32 +22,34 @@
       <button class="btn-primary" @click="loadTemplates">搜索</button>
     </div>
 
-    <div class="card overflow-hidden">
-      <div v-if="isLoading" class="p-8 text-center text-gray-400">加载中...</div>
-      <table v-else class="w-full text-sm">
-        <thead class="bg-gray-50 border-b border-gray-200">
-          <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">学校</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">学历</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">引用格式</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">状态</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+    <div v-if="isLoading" class="card p-8 text-center text-gray-400">加载中...</div>
+    <div v-else-if="groupedTemplates.length === 0" class="card p-8 text-center text-gray-400">暂无模板</div>
+
+    <!-- Grouped by school -->
+    <div v-for="group in groupedTemplates" :key="group.schoolName" class="card overflow-hidden">
+      <div class="px-4 py-2.5 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+        <span class="text-sm font-semibold text-gray-800">{{ group.schoolName }}</span>
+        <span class="text-xs text-gray-400">{{ group.templates.length }} 个学历</span>
+      </div>
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-100">
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase">学历</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase">引用格式</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase">状态</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase">操作</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-100">
-          <tr v-if="templates.length === 0">
-            <td colspan="5" class="px-4 py-8 text-center text-gray-400">暂无模板</td>
-          </tr>
-          <tr v-for="tpl in templates" :key="tpl.id" class="hover:bg-gray-50">
-            <td class="px-4 py-3">{{ tpl.schoolName }}</td>
-            <td class="px-4 py-3">{{ degreeLabel(tpl.degreeType) }}</td>
-            <td class="px-4 py-3">{{ tpl.citationStyle }}</td>
-            <td class="px-4 py-3">
+        <tbody class="divide-y divide-gray-50">
+          <tr v-for="tpl in group.templates" :key="tpl.id" class="hover:bg-gray-50">
+            <td class="px-4 py-2.5">{{ degreeLabel(tpl.degreeType) }}</td>
+            <td class="px-4 py-2.5 text-gray-600">{{ tpl.citationStyle }}</td>
+            <td class="px-4 py-2.5">
               <span :class="tpl.status === 'ENABLED' ? 'badge-success' : 'badge-gray'" class="badge">
                 {{ tpl.status === 'ENABLED' ? '启用' : '停用' }}
               </span>
             </td>
-            <td class="px-4 py-3 flex items-center gap-2">
+            <td class="px-4 py-2.5 flex items-center gap-2">
               <button class="text-xs text-primary-600 hover:underline" @click="editTemplate(tpl.id)">编辑</button>
               <button
                 class="text-xs hover:underline"
@@ -65,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { adminApi } from '@/services/http/admin-api'
 import { DegreeType } from '@ai-paper/shared'
@@ -86,6 +88,17 @@ const DEGREE_LABELS: Record<DegreeType, string> = {
 function degreeLabel(degree: DegreeType): string {
   return DEGREE_LABELS[degree] ?? degree
 }
+
+const groupedTemplates = computed(() => {
+  const map = new Map<string, AdminTemplateListItemDto[]>()
+  for (const tpl of templates.value) {
+    if (!map.has(tpl.schoolName)) map.set(tpl.schoolName, [])
+    map.get(tpl.schoolName)!.push(tpl)
+  }
+  return Array.from(map.entries())
+    .sort(([a], [b]) => a.localeCompare(b, 'zh'))
+    .map(([schoolName, tpls]) => ({ schoolName, templates: tpls }))
+})
 
 async function loadTemplates(): Promise<void> {
   isLoading.value = true

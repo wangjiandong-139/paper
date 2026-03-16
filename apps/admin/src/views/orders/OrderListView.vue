@@ -26,6 +26,10 @@
         <label class="text-xs text-gray-500">用户ID</label>
         <input v-model="filters.userId" type="text" class="input-field w-36 text-sm" placeholder="用户ID" />
       </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-xs text-gray-500">论文标题</label>
+        <input v-model="filters.search" type="text" class="input-field w-48 text-sm" placeholder="标题关键词..." />
+      </div>
       <button class="btn-primary" @click="applyFilters">搜索</button>
       <button class="btn-secondary" @click="resetFilters">重置</button>
     </div>
@@ -110,6 +114,7 @@ const filters = ref({
   startDate: '',
   endDate: '',
   userId: '',
+  search: '',
 })
 
 const exportFilters = computed(() => ({
@@ -152,6 +157,7 @@ function applyFilters(): void {
     startDate: filters.value.startDate || undefined,
     endDate: filters.value.endDate || undefined,
     userId: filters.value.userId || undefined,
+    search: filters.value.search || undefined,
   })
   store.loadOrders()
 }
