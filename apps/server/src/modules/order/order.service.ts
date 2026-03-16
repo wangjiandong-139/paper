@@ -160,6 +160,20 @@ export class OrderService {
     this.updateOrderStatus(orderId, OrderStatus.FAILED);
   }
 
+  async incrementAiRevisionCount(orderId: string): Promise<number> {
+    const order = this.orders.get(orderId);
+    if (!order) throw new Error(`Order ${orderId} not found`);
+    const updated = { ...order, aiRevisionCount: order.aiRevisionCount + 1, updatedAt: new Date() };
+    this.orders.set(orderId, updated);
+    return updated.aiRevisionCount;
+  }
+
+  async getAiRevisionCount(orderId: string): Promise<number> {
+    const order = this.orders.get(orderId);
+    if (!order) throw new Error(`Order ${orderId} not found`);
+    return order.aiRevisionCount;
+  }
+
   private updateOrderStatus(orderId: string, status: OrderStatus): void {
     const order = this.orders.get(orderId);
     if (!order) return;

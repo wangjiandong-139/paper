@@ -200,21 +200,23 @@
   - [ ]* 15.8 微信消息通知（P2）
     - _需求：6.8_
 
-- [ ] 16. 实现改稿模块（apps/server/src/modules/revision）
-  - [ ] 16.1 改稿内容保存接口
-    - 实现 `PATCH /api/orders/:id/revision`：保存用户在富文本编辑器中的手动编辑内容（存储为 HTML/JSON）
+- [x] 16. 实现改稿模块（apps/server/src/modules/revision）
+  - [x] 16.1 改稿内容保存接口
+    - 实现 `PATCH /api/orders/:id/revision`：保存用户手动编辑的论文内容（HTML/JSON），用户隔离，多次保存覆盖旧内容
     - _需求：7.1_
-  - [ ] 16.2 AI 改稿接口
-    - 实现 `POST /api/orders/:id/revision/ai`：接受 `RevisionType` 枚举参数，统一处理按意见修改（`REWRITE`）、降重（`REDUCE_PLAGIARISM`）、降 AI 痕迹（`REDUCE_AI`）、扩写（`EXPAND`）、缩写（`SHRINK`）、润色（`POLISH`）六种操作，流式返回（SSE）；每次调用计入改稿次数
+  - [x] 16.2 AI 改稿接口
+    - 实现 `POST /api/orders/:id/revision/ai`：统一处理六种 `RevisionType`（REWRITE、REDUCE_PLAGIARISM、REDUCE_AI、EXPAND、SHRINK、POLISH），流式返回（SSE）；每次调用计入 `aiRevisionCount`
+    - BASIC 套餐限制 3 次，超限抛出 ForbiddenException（403）
+    - 提示词注入原始内容、RevisionType 指令、可选指定修改意见；REWRITE/REDUCE_PLAGIARISM 时额外注入文献列表
     - _需求：7.2、7.3、7.4_
-  - [ ] 16.3 引用核对接口
-    - 实现 `POST /api/orders/:id/citation-check`：扫描正文，核对引用格式与文献列表一致性，返回 `CitationCheckResultDTO`
+  - [x] 16.3 引用核对接口
+    - 实现 `POST /api/orders/:id/citation-check`：正则扫描 `[n]` / `[n,m]` 引用，按序号与文献列表比对，返回 `CitationCheckResultDTO`（traceable / untraceable 两组）
     - _需求：7.5_
-  - [ ] 16.4 加图/表接口（P2）*
-    - 实现 `POST /api/orders/:id/revision/figure` 和 `POST /api/orders/:id/revision/table`：插入 AI 生成图表；此操作不计入改稿次数
+  - [ ]* 16.4 加图/表接口（P2）
     - _需求：7.6_
-  - [ ] 16.5 改稿模块单元测试
-    - 验证改稿次数计数逻辑（REWRITE/REDUCE_PLAGIARISM/REDUCE_AI/EXPAND/SHRINK/POLISH 计入；加图/表不计入）；验证 SSE 流式输出
+  - [x] 16.5 改稿模块单元测试
+    - 验证六种 RevisionType 均计入次数；BASIC 套餐第 4 次抛 ForbiddenException；SSE 流式输出正确；引用核对 traceable/untraceable 分类；未保存内容时返回空
+    - 新增 19 个单元测试，全部通过
     - _需求：7.3、7.4_
 
 - [ ] 17. 实现 Word/PDF 文件生成与下载（apps/server/src/modules/revision）
