@@ -105,10 +105,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useGenerationProgress } from '@/composables/useGenerationProgress'
-import { ref } from 'vue'
 
 const router = useRouter()
 const route = useRoute()
