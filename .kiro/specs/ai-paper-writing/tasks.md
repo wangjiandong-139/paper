@@ -57,21 +57,21 @@
   - 所有认证模块测试通过，覆盖率 ≥ 80%
   - _如有疑问请询问用户（ask the user if questions arise）_
 
-- [ ] 6. 实现用户模块（apps/server/src/modules/user）
+- [x] 6. 实现用户模块（apps/server/src/modules/user）
   - [x] 实现 `PATCH /api/users/me`：允许用户更新昵称、头像等个人信息
   - [x] 实现 `GET /api/users/me`：返回当前登录用户信息
   - [x] 写单元测试：验证更新成功、未登录返回 401
   - _需求：1.2、1.3_
 
-- [ ] 7. 实现草稿模块（apps/server/src/modules/wizard）
-  - [ ] 7.1 草稿 CRUD 接口
+- [x] 7. 实现草稿模块（apps/server/src/modules/wizard）
+  - [x] 7.1 草稿 CRUD 接口
     - 实现 `GET /api/drafts`（列表）、`POST /api/drafts`（创建）、`PATCH /api/drafts/:id/step/:n`（更新步骤数据）
     - 草稿步骤数据以 JSON 字段存储，支持步骤 1～3 数据独立保存
     - _需求：2.1、3.1、4.1_
-  - [ ] 7.2 草稿状态持久化测试
+  - [x] 7.2 草稿状态持久化测试
     - 验证步骤数据正确写入 `drafts.step_data` JSON 字段；验证多草稿并行互不干扰
     - _需求：2.1_
-  - [ ] 7.3 草稿软删除
+  - [x] 7.3 草稿软删除
     - 实现用户主动删除草稿（`DELETE /api/drafts/:id`），使用 `deleted_at` 软删除
     - _需求：2.1_
 
