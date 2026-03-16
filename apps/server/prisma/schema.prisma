@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PlanType {
+  BASIC
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  GENERATING
+  COMPLETED
+  FAILED
+}
+
+enum ChapterStatus {
+  PENDING
+  GENERATING
+  DONE
+  FAILED
+}
+
+enum ReferenceSource {
+  CNKI
+  WANFANG
+  VIPINFO
+  SEMANTIC_SCHOLAR
+  CROSSREF
+  USER_INPUT
+}
+
+model User {
+  id                  String   @id @default(uuid())
+  wechat_open_id      String   @unique
+  wechat_union_id     String?  @unique
+  nickname            String?
+  avatar_url          String?
+  onboarding_completed Boolean  @default(false)
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+  deleted_at          DateTime?
+
+  drafts Draft[]
+  orders Order[]
+}
+
+model Draft {
+  id           String   @id @default(uuid())
+  user_id      String
+  current_step Int
+  step1_data   Json
+  step2_data   Json
+  step3_data   Json
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  deleted_at   DateTime?
+
+  user  User  @relation(fields: [user_id], references: [id])
+  order Order?
+}
+
+model Order {
+  id                 String        @id @default(uuid())
+  user_id            String
+  draft_id           String
+  plan_type          PlanType
+  plan_price         Int
+  wechat_pay_order_id String
+  status             OrderStatus
+  generation_progress Json?
+  bullmq_job_id      String?
+  ai_revision_count  Int           @default(0)
+  revision_content   Json?
+  paper_snapshot     Json
+  created_at         DateTime      @default(now())
+  updated_at         DateTime      @updatedAt
+
+  user              User             @relation(fields: [user_id], references: [id])
+  draft             Draft            @relation(fields: [draft_id], references: [id])
+  generatedChapters GeneratedChapter[]
+}
+
+model GeneratedChapter {
+  id                    String        @id @default(uuid())
+  order_id              String
+  chapter_index         Int
+  chapter_title         String
+  content               String
+  citation_check_result Json?
+  status                ChapterStatus
+  created_at            DateTime      @default(now())
+  updated_at            DateTime      @updatedAt
+
+  order Order @relation(fields: [order_id], references: [id])
+}
+
+model Reference {
+  id           String          @id @default(uuid())
+  source       ReferenceSource
+  external_id  String?
+  title        String
+  authors      Json
+  journal      String?
+  year         Int?
+  raw_citation String?
+  metadata     Json?
+  created_at   DateTime        @default(now())
+
+  @@unique([source, external_id])
+}
+
+model SystemConfig {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+  description String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  updated_by  String?
+}
+
+model FormatTemplate {
+  id             String    @id @default(uuid())
+  name           String
+  school_keyword Json
+  is_default     Boolean   @default(false)
+  config         Json
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+  deleted_at     DateTime?
+}
+
