@@ -8,24 +8,24 @@
 
 ## 任务列表
 
-- [ ] 1. 初始化 Monorepo 项目结构
+- [x] 1. 初始化 Monorepo 项目结构
   - 创建 `pnpm-workspace.yaml`，配置 `apps/web`、`apps/server`、`packages/shared` 三个工作区
   - 创建根 `package.json`，配置 ESLint、TypeScript 5.x、Prettier 共享配置
   - 初始化 `packages/shared`：配置 `tsconfig.json`，创建 `src/enums/index.ts`、`src/types/index.ts`、`src/dto/index.ts` 入口文件
   - 创建 `docker-compose.yml`，配置 PostgreSQL 16 + Redis 7 服务
   - _需求：1.7、11.3_
 
-- [ ] 2. 实现共享类型与枚举（packages/shared）
-  - [ ] 2.1 实现枚举定义
+- [x] 2. 实现共享类型与枚举（packages/shared）
+  - [x] 2.1 实现枚举定义
     - 在 `packages/shared/src/enums/index.ts` 中实现 `PlanType`、`OrderStatus`、`ChapterStatus`、`ReferenceSource`、`Language`、`DegreeType`、`RevisionType` 枚举
     - _需求：5.2、6.1、7.4_
-  - [ ]* 2.2 为枚举写属性测试
+  - [x]* 2.2 为枚举写属性测试
     - **Property 1：枚举值唯一性** — 所有枚举成员的字符串值在同一枚举内不重复
     - **Validates: 需求 5.2、7.4**
-  - [ ] 2.3 实现核心 DTO 与类型定义
+  - [x] 2.3 实现核心 DTO 与类型定义
     - 在 `packages/shared/src/types/index.ts` 中实现 `Step1Data`、`Step2Data`、`Step3Data`、`ReferenceItem`、`OutlineNode`、`GenerationProgressEvent`、`CitationItem`、`CitationCheckResultDTO`
     - _需求：2.1、3.1、4.1、6.1_
-  - [ ]* 2.4 为 OutlineNode 树结构写属性测试
+  - [x]* 2.4 为 OutlineNode 树结构写属性测试
     - **Property 2：OutlineNode 树深度约束** — 任意合法 OutlineNode 树的 level 值满足 1 ≤ level ≤ 3，且子节点 level 等于父节点 level + 1
     - **Validates: 需求 4.1**
 
