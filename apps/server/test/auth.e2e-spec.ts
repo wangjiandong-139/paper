@@ -30,6 +30,8 @@ describe('AuthModule (e2e)', () => {
     expect(res.body).toHaveProperty('user');
     expect(res.body.user).toHaveProperty('id');
     expect(res.body.user).toHaveProperty('wechat_open_id');
+    expect(res.body.user).toHaveProperty('nickname');
+    expect(res.body.user).toHaveProperty('avatar_url');
   });
 });
 

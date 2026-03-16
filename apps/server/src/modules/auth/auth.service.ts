@@ -8,6 +8,8 @@ export interface WechatLoginPayload {
 export interface AuthUser {
   id: string;
   wechat_open_id: string;
+  nickname?: string;
+  avatar_url?: string;
 }
 
 export interface AuthResult {
@@ -24,6 +26,8 @@ export class AuthService {
       user: {
         id: 'mock-user-id',
         wechat_open_id: 'mock-open-id',
+        nickname: 'mock-nickname',
+        avatar_url: 'https://example.com/avatar.png',
       },
     };
   }
