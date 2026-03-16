@@ -126,15 +126,20 @@
     - 写单元测试 27 个，覆盖 CRUD、关键词搜索、软删除、引文格式解析，全部通过
     - _需求：8.1、8.5_
 
-- [ ] 12. 实现系统配置模块与查重适配器（apps/server/src/modules/admin）
-  - [ ] 12.1 系统配置接口
-    - 实现 `GET /api/admin/config`、`PATCH /api/admin/config`：运营后台管理查重服务商、AI 模型、套餐价格等配置
+- [x] 12. 实现系统配置模块与查重适配器（apps/server/src/modules/admin）
+  - [x] 12.1 系统配置接口
+    - 实现 `GET /api/admin/system-configs`、`PATCH /api/admin/system-configs/:key`：运营后台管理查重服务商、AI 提供商等配置
+    - 预置键：`plagiarism_provider`（默认 wanfang）、`ai_provider`（默认 openai）；`key` 唯一，只更新不删除
+    - 接口受 JwtAuthGuard 保护
     - _需求：7.6、8.2_
-  - [ ] 12.2 查重适配器实现
-    - 在 `adapters/plagiarism/` 实现万方/知网/维普查重适配器，统一接口；支持运营后台切换服务商
+  - [x] 12.2 查重适配器实现
+    - 在 `adapters/plagiarism/` 实现 `IPlagiarismAdapter` 接口（`check(content) → PlagiarismResultDTO`）
+    - 实现 `WanfangPlagiarismAdapter`、`CnkiPlagiarismAdapter`、`VipinfoPlagiarismAdapter` 三个存根适配器
+    - `PlagiarismService` 在每次调用前读取 `SystemConfigService.get('plagiarism_provider')` 动态选择适配器
     - _需求：7.6_
-  - [ ] 12.3 系统配置单元测试
-    - 验证配置读写正确；验证查重适配器切换逻辑
+  - [x] 12.3 系统配置单元测试
+    - 验证配置预置值、读写、未知 key 抛错；验证三个适配器均返回正确 provider 和 similarityRate；验证 PlagiarismService 适配器切换逻辑、无效 provider 抛错
+    - 新增 17 个单元测试，全部通过
     - _需求：7.6、8.2_
 
 - [ ] 13. 实现订单与支付模块（apps/server/src/modules/order）
