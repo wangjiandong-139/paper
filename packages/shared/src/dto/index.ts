@@ -1,3 +1,5 @@
+export * from './admin/index';
+
 import { Language, PlanType } from '../enums';
 import {
   CitationCheckResultDTO,

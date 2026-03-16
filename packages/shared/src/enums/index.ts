@@ -1,3 +1,5 @@
+export * from './admin/index';
+
 export enum PlanType {
   BASIC = 'BASIC', // 基础版（当前唯一支持套餐）
   // 预留扩展：

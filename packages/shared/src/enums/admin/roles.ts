@@ -1,0 +1,12 @@
+export enum AdminRole {
+  SUPER_ADMIN = 'SUPER_ADMIN',
+  OPERATOR = 'OPERATOR',
+  CUSTOMER_SERVICE = 'CUSTOMER_SERVICE',
+  READ_ONLY = 'READ_ONLY',
+}
+
+export enum AdminUserStatus {
+  ACTIVE = 'ACTIVE',
+  DISABLED = 'DISABLED',
+  LOCKED = 'LOCKED',
+}
