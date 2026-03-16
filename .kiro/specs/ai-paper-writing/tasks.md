@@ -258,25 +258,24 @@
     - 28 个单元测试（guards×10 + LoginView×9 + OnboardingGuide×9），全部通过；累计 44 个测试 100% 通过
     - _需求：11.1、11.5、1.5_
 
-- [ ] 21. 实现步骤 1 基础信息表单（apps/web/src/views/wizard/Step1BasicInfo.vue）
-  - [ ] 21.1 表单字段实现
-    - 实现学科选择、论文标题输入、语言选择（中/英）、学历类型选择、目标字数输入、学校/格式模板选择
-    - 使用 Vant 4 表单组件，移动端触摸热区 ≥ 44pt
+- [x] 21. 实现步骤 1 基础信息表单（apps/web/src/views/wizard/Step1BasicInfo.vue）
+  - [x] 21.1 表单字段实现
+    - 实现学科选择（Picker）、论文标题输入、语言选择（中/英）、学历类型选择（本科/硕士/博士/其他）、目标字数（快选+自定义）、格式模板选择、AI 投喂文本域
+    - 使用 Vant 4 表单组件，按钮触摸热区 ≥ 44pt；学历切换自动带出推荐字数
     - _需求：2.1、2.2_
-  - [ ] 21.2 表单校验
-    - 实现必填项校验（标题、学科、字数）；字数范围校验（3000～100000）
+  - [x] 21.2 表单校验
+    - 提取 `step1-validation.ts` 纯函数模块：必填项（标题、学科、字数）；字数范围 3000～100000；AI 投喂 ≤ 1500 字
     - _需求：2.3_
   - [ ] 21.3 智能选题（P2）*
-    - 实现 AI 辅助选题建议功能：用户输入研究方向，AI 返回候选标题列表
     - _需求：2.4_
   - [ ] 21.4 开题报告解析（P2）*
-    - 实现上传开题报告文件（PDF/Word），AI 自动提取标题、学科、提纲信息预填表单
     - _需求：2.5_
-  - [ ] 21.5 步骤数据持久化
-    - 表单提交时调用 `PATCH /api/drafts/:id/step/1`，保存到服务端；Pinia store 同步缓存
+  - [x] 21.5 步骤数据持久化
+    - 实现 `useWizardStore`：草稿 CRUD（loadDrafts/createDraft/selectDraft/deleteDraft），saveStep1/2/3 调用 `PATCH /api/drafts/:id/step/:n`，本地缓存同步
+    - 提取 `types/wizard.ts`：Step1Data/Step2Data/Step3Data/DraftDTO/枚举/常量
     - _需求：2.1_
-  - [ ] 21.6 步骤 1 单元测试
-    - 验证表单校验逻辑；验证数据提交与持久化
+  - [x] 21.6 步骤 1 单元测试
+    - step1-validation×18（必填/字数范围/AI 投喂/isStep1Valid）+ wizard store×16（CRUD/保存/计算属性/reset）= 34 个新增测试，全部通过；累计 78 个测试 100% 通过
     - _需求：2.1、2.3_
 
 - [ ] 22. 实现步骤 2 参考文献管理（apps/web/src/views/wizard/Step2References.vue）
