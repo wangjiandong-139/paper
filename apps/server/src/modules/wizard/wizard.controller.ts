@@ -12,6 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/jwt-auth.guard';
+import { OutlineNode } from '../outline/outline.service';
 import { Draft, DraftReferenceItem, WizardService } from './wizard.service';
 
 interface AuthedRequest extends Request {
@@ -76,6 +77,16 @@ export class WizardController {
   ): Promise<Draft> {
     const userId = this.getUserId(req);
     return this.wizardService.removeReference(userId, id, refId);
+  }
+
+  @Patch(':id/outline')
+  async saveOutline(
+    @Req() req: AuthedRequest,
+    @Param('id') id: string,
+    @Body() body: OutlineNode[],
+  ): Promise<Draft> {
+    const userId = this.getUserId(req);
+    return this.wizardService.saveOutline(userId, id, body);
   }
 }
 

@@ -18,8 +18,8 @@
   },
   "devDependencies": {
     "@nestjs/testing": "^10.0.0",
+    "@types/express": "^5.0.6",
     "@types/supertest": "^2.0.16",
     "supertest": "^7.0.0"
   }
 }
-

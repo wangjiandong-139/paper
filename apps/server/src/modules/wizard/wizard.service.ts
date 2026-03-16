@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ReferenceSource } from '../../../../../packages/shared/src/enums';
+import { OutlineNode } from '../outline/outline.service';
 
 export interface DraftReferenceItem {
   id: string;
@@ -34,6 +35,12 @@ export class WizardService {
     return Array.from(this.drafts.values()).filter(
       (d) => d.user_id === userId && !d.deleted_at,
     );
+  }
+
+  async getDraft(userId: string, draftId: string): Promise<Draft | null> {
+    const draft = this.drafts.get(draftId);
+    if (!draft || draft.user_id !== userId || draft.deleted_at) return null;
+    return draft;
   }
 
   async createDraft(userId: string): Promise<Draft> {
@@ -95,7 +102,7 @@ export class WizardService {
     this.drafts.set(draftId, draft);
   }
 
-  /** 向草稿的 step2_data.references 追加一条文�?*/
+  /** ???? step2_data.references ?????? */
   async addReference(
     userId: string,
     draftId: string,
@@ -120,7 +127,7 @@ export class WizardService {
     return next;
   }
 
-  /** 从草稿的 step2_data.references 中移除一条文�?*/
+  /** ???? step2_data.references ??????? */
   async removeReference(
     userId: string,
     draftId: string,
@@ -144,5 +151,26 @@ export class WizardService {
     this.drafts.set(draftId, next);
     return next;
   }
-}
 
+  /** ?????????? step3_data.outline */
+  async saveOutline(
+    userId: string,
+    draftId: string,
+    outline: OutlineNode[],
+  ): Promise<Draft> {
+    const draft = this.drafts.get(draftId);
+    if (!draft || draft.user_id !== userId || draft.deleted_at) {
+      throw new Error('Draft not found');
+    }
+
+    const step3 = (draft.step3_data ?? {}) as Record<string, unknown>;
+    const next: Draft = {
+      ...draft,
+      step3_data: { ...step3, outline, confirmed: false },
+      current_step: Math.max(draft.current_step, 3),
+      updated_at: new Date(),
+    };
+    this.drafts.set(draftId, next);
+    return next;
+  }
+}
