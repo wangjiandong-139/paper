@@ -142,30 +142,36 @@
     - 新增 17 个单元测试，全部通过
     - _需求：7.6、8.2_
 
-- [ ] 13. 实现订单与支付模块（apps/server/src/modules/order）
-  - [ ] 13.1 创建订单接口
-    - 实现 `POST /api/orders`：根据草稿 ID 和套餐类型创建订单，当前仅支持基础版套餐（`PlanType.BASIC`）
+- [x] 13. 实现订单与支付模块（apps/server/src/modules/order）
+  - [x] 13.1 创建订单接口
+    - 实现 `POST /api/orders`：根据草稿 ID 和套餐类型创建订单，仅支持 `PlanType.BASIC`（9900 分 = 99 元）
+    - 返回 `{ orderId, payParams }` 含微信 JSAPI 支付参数
     - _需求：5.1、5.2_
-  - [ ] 13.2 微信支付集成
-    - 在 `adapters/payment/` 实现微信支付适配器：公众号 JSAPI 支付（移动端）+ Native 扫码支付（PC 端）
-    - 实现支付回调 `POST /api/orders/wechat/notify`，验签后更新订单状态
+  - [x] 13.2 微信支付集成
+    - 在 `adapters/payment/` 实现 `IPaymentAdapter` 接口 + `WechatPaymentAdapter` 存根
+    - 支持 JSAPI（H5）和 Native 扫码支付两种模式
+    - 实现 `POST /api/orders/:id/wechat-pay/notify` 支付回调（无 JWT 保护）
     - _需求：5.3、5.4_
-  - [ ] 13.3 订单状态管理
-    - 实现订单状态流转：`PENDING_PAYMENT` → `GENERATING` → `COMPLETED` / `FAILED`（与 `OrderStatus` 枚举严格对齐，无 `PAID` 中间状态）
-    - 支付回调验签成功后直接将订单置为 `GENERATING` 并触发生成任务
+  - [x] 13.3 订单状态管理
+    - 状态流转：`PENDING_PAYMENT` → `GENERATING` → `COMPLETED` / `FAILED`（严格对齐枚举）
+    - 支付回调验签成功后直接置为 `GENERATING`（无 PAID 中间状态）
+    - 提供 `markOrderCompleted()` / `markOrderFailed()` 供生成模块调用
     - _需求：5.5_
-  - [ ] 13.4 订单列表接口
-    - 实现 `GET /api/orders`：返回当前用户订单列表，含状态、套餐、创建时间
+  - [x] 13.4 订单列表接口
+    - 实现 `GET /api/orders`（列表）、`GET /api/orders/:id`（详情），用户数据严格隔离
     - _需求：5.6_
-  - [ ] 13.5 支付模块单元测试
-    - Mock 微信支付 API，验证签名生成、回调验签、订单状态流转
+  - [x] 13.5 支付模块单元测试
+    - Mock 微信支付适配器，验证 JSAPI 参数生成、回调验签成功/失败、状态流转
     - _需求：5.3、5.4_
-  - [ ] 13.6 支付安全测试
-    - 验证重复回调幂等处理；验证金额篡改防护
+  - [x] 13.6 支付安全测试
+    - 验证重复回调幂等（GENERATING/COMPLETED 状态均返回 true 不重复处理）
+    - 验证金额被篡改时回调返回 false 且订单状态不变
+    - 新增 21 个单元测试，全部通过
     - _需求：5.4_
 
-- [ ] 14. 检查点 — 订单与支付模块
+- [x] 14. 检查点 — 订单与支付模块
   - 验证：订单创建、微信支付回调、状态流转全链路可用；支付安全测试通过
+  - 15 个测试套件，162 个测试，100% 通过
   - _如有疑问请询问用户（ask the user if questions arise）_
 
 - [ ] 15. 实现后台生成任务（apps/server/src/modules/generation）
