@@ -242,20 +242,20 @@
   - 16 个单元测试，100% 通过（覆盖登录/登出/引导/更新/恢复 token 全流程）
   - _需求：1.1、1.3_
 
-- [ ] 20. 实现登录页与首次引导（apps/web/src/views/auth）
-  - [ ] 20.1 微信登录页面
-    - 实现 `LoginView.vue`：移动端显示微信授权按钮，PC 端显示微信扫码登录二维码
-    - 登录成功后跳转至草稿列表或上次未完成的向导步骤
+- [x] 20. 实现登录页与首次引导（apps/web/src/views/auth）
+  - [x] 20.1 微信登录页面
+    - 实现 `LoginView.vue`：移动端显示微信授权按钮（跳转 OAuth），PC 端显示微信扫码登录二维码（轮询 /auth/wechat/qrcode/poll）
+    - 登录成功后根据 needsOnboarding 跳转 /onboarding 或 redirect 指定路由
     - _需求：1.1、1.2_
-  - [ ] 20.2 首次引导（Onboarding）
-    - 实现 `components/common/OnboardingGuide.vue`：≤ 5 屏，每屏一句话说明主流程步骤，提供「跳过」和「下一步」按钮，最后一屏点击「开始写论文」进入步骤 1
-    - 配置路由守卫：已登录且 `onboarding_completed = false` 时跳转 `/onboarding`；完成或跳过后调用 `PATCH /api/users/me` 将 `onboarding_completed` 置为 `true`
+  - [x] 20.2 首次引导（Onboarding）
+    - 实现 `components/common/OnboardingGuide.vue`：5 屏，每屏图标+标题+说明，提供「下一步」/「跳过」/「开始写论文」按钮，最后一屏隐藏跳过
+    - 提取路由守卫为 `router/guards.ts`：已登录且 needsOnboarding=true 时跳转 `/onboarding`；完成或跳过后调用 `PATCH /api/users/me`
     - _需求：1.5_
-  - [ ] 20.3 登录状态守卫
-    - 配置 Vue Router 导航守卫：未登录用户访问向导页自动跳转登录页
+  - [x] 20.3 登录状态守卫
+    - `router/guards.ts` 中 authGuard 纯函数：未登录跳转登录页、已登录访问登录页跳转首页、未完成引导跳转 onboarding
     - _需求：1.3_
-  - [ ] 20.4 登录页单元测试
-    - 验证登录成功跳转逻辑；验证未登录守卫重定向；验证 Onboarding 完成后不再展示
+  - [x] 20.4 登录页单元测试
+    - 28 个单元测试（guards×10 + LoginView×9 + OnboardingGuide×9），全部通过；累计 44 个测试 100% 通过
     - _需求：11.1、11.5、1.5_
 
 - [ ] 21. 实现步骤 1 基础信息表单（apps/web/src/views/wizard/Step1BasicInfo.vue）
