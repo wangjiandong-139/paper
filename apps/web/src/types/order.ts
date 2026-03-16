@@ -67,3 +67,23 @@ export interface OrderDTO {
 export type PaymentResult =
   | { success: true; orderId: string }
   | { success: false; error: string }
+
+// ─── 生成进度 SSE 事件 ──────────────────────────────────────────────────
+
+export interface ProgressChapter {
+  index: number
+  title: string
+  wordCount: number
+}
+
+export type ProgressEventType = 'chapter_complete' | 'all_complete' | 'error'
+
+export interface GenerationProgressEvent {
+  type: ProgressEventType
+  orderId: string
+  chapter?: ProgressChapter
+  totalChapters: number
+  completedChapters: number
+  progress: number  // 0-100
+  error?: string
+}
