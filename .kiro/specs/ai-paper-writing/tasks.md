@@ -29,7 +29,7 @@
     - **Property 2：OutlineNode 树深度约束** — 任意合法 OutlineNode 树的 level 值满足 1 ≤ level ≤ 3，且子节点 level 等于父节点 level + 1
     - **Validates: 需求 4.1**
 
-- [ ] 3. 初始化后端 NestJS 应用（apps/server）
+- [x] 3. 初始化后端 NestJS 应用（apps/server）
   - 创建 NestJS 项目，配置 `tsconfig.json`（禁止 `any`，strict 模式）
   - 配置 Jest + Supertest 测试环境
   - 初始化 Prisma：创建 `prisma/schema.prisma`，定义 `User`、`Draft`、`Order`、`GeneratedChapter`、`Reference`、`FormatTemplate`、`SystemConfig` 七张表及关系
@@ -38,11 +38,11 @@
   - _需求：1.7、11.1_
 
 - [ ] 4. 实现认证模块（apps/server/src/modules/auth）
-  - [ ] 4.1 微信 OAuth 登录接口
+  - [x] 4.1 微信 OAuth 登录接口
     - 实现 `POST /api/auth/wechat`：接收微信 `code`，换取 `access_token`，获取 `wechat_open_id`，首次登录自动创建用户记录（幂等：同一 OpenID 不重复创建）
     - 返回 JWT（含 `userId`、`wechat_open_id`），有效期与刷新策略见 design.md §关键技术方案
     - _需求：11.1、11.2_
-  - [ ] 4.2 为微信登录写单元测试
+  - [x] 4.2 为微信登录写单元测试
     - Mock 微信 API 调用，验证首次登录创建用户、重复登录返回同一用户
     - _需求：11.1_
   - [ ] 4.3 JWT 守卫集成测试
