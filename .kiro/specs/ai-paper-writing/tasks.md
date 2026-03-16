@@ -39,15 +39,15 @@
 
 - [ ] 4. 实现认证模块（apps/server/src/modules/auth）
   - [ ] 4.1 微信 OAuth 登录接口
-    - 实现 `POST /api/auth/wechat`：接收微信 `code`，换取 `access_token`，获取 `wechat_open_id`，首次登录自动创建用户记录
-    - 返回 JWT（含 `userId`、`wechat_open_id`），有效期 7 天
-    - _需求：1.1、1.2_
+    - 实现 `POST /api/auth/wechat`：接收微信 `code`，换取 `access_token`，获取 `wechat_open_id`，首次登录自动创建用户记录（幂等：同一 OpenID 不重复创建）
+    - 返回 JWT（含 `userId`、`wechat_open_id`），有效期与刷新策略见 design.md §关键技术方案
+    - _需求：11.1、11.2_
   - [ ] 4.2 为微信登录写单元测试
     - Mock 微信 API 调用，验证首次登录创建用户、重复登录返回同一用户
-    - _需求：1.1_
+    - _需求：11.1_
   - [ ] 4.3 JWT 守卫集成测试
     - 验证无 token / 过期 token 返回 401，有效 token 正常放行
-    - _需求：1.3_
+    - _需求：11.5_
   - [ ] 4.4 实现用户信息初始化
     - 登录时同步微信昵称、头像到 `users` 表（`nickname`、`avatar_url`）
     - _需求：1.2_
@@ -84,15 +84,18 @@
     - _需求：3.2_
   - [ ] 8.3 用户文献管理接口
     - 实现文献的增删改查（`POST /api/drafts/:id/references`、`DELETE /api/drafts/:id/references/:refId`）
-    - 支持用户粘贴 DOI/URL 自动解析文献元数据
-    - _需求：3.3、3.4_
+    - 支持用户粘贴知网引文格式（每行一条）解析文献；支持上传题录文件（PDF/Word）
+    - _需求：3.1、3.3、3.4_
+  - [ ]* 8.5 DOI/URL 自动解析（P2）
+    - 支持用户粘贴 DOI 或文献 URL 自动解析文献元数据，作为知网引文格式粘贴的补充能力
+    - _需求：3.1_
   - [ ] 8.4 文献模块单元测试
-    - Mock 文献 API，验证推荐结果格式；验证 DOI 解析逻辑
+    - Mock 文献 API，验证推荐结果格式；验证知网引文格式解析逻辑；验证题录文件上传解析
     - _需求：3.1、3.3_
 
 - [ ] 9. 实现提纲模块（apps/server/src/modules/outline）
   - [ ] 9.1 AI 生成提纲接口
-    - 实现 `POST /api/drafts/:id/outline/generate`：调用 AI 适配器，基于步骤 1 信息和确认文献生成提纲，流式返回（SSE）
+    - 实现 `POST /api/outlines/generate`：接收 `draft_id`，调用 AI 适配器，基于步骤 1 信息和确认文献生成提纲，流式返回（SSE）
     - _需求：4.1、4.2_
   - [ ] 9.2 提纲保存与编辑接口
     - 实现 `PATCH /api/drafts/:id/outline`：保存用户编辑后的提纲（`OutlineNode[]` 结构）
@@ -113,21 +116,22 @@
   - [ ] 11.1 模板管理接口
     - 实现 `GET /api/templates`（列表）、`GET /api/templates/:id`（详情）
     - 运营后台 `POST /api/admin/templates`（上传模板文件）
-    - _需求：1.6、11.1_
+    - _需求：8.1、8.2、8.4_
   - [ ] 11.2 模板解析逻辑
     - 实现 Word 模板文件解析，提取页边距、字体、行距等格式参数，存入 `format_templates` 表
-    - _需求：11.1、11.2_
+    - 实现参考文献著录规范的解析与存储（支持 GB/T 7714、APA、MLA），在 Word 生成时按模板配置的著录格式渲染参考文献列表
+    - _需求：8.1、8.5_
 
 - [ ] 12. 实现系统配置模块与查重适配器（apps/server/src/modules/admin）
   - [ ] 12.1 系统配置接口
     - 实现 `GET /api/admin/config`、`PATCH /api/admin/config`：运营后台管理查重服务商、AI 模型、套餐价格等配置
-    - _需求：12.1、12.2_
+    - _需求：7.6、8.2_
   - [ ] 12.2 查重适配器实现
     - 在 `adapters/plagiarism/` 实现万方/知网/维普查重适配器，统一接口；支持运营后台切换服务商
-    - _需求：12.1_
+    - _需求：7.6_
   - [ ] 12.3 系统配置单元测试
     - 验证配置读写正确；验证查重适配器切换逻辑
-    - _需求：12.1、12.2_
+    - _需求：7.6、8.2_
 
 - [ ] 13. 实现订单与支付模块（apps/server/src/modules/order）
   - [ ] 13.1 创建订单接口
@@ -138,7 +142,8 @@
     - 实现支付回调 `POST /api/orders/wechat/notify`，验签后更新订单状态
     - _需求：5.3、5.4_
   - [ ] 13.3 订单状态管理
-    - 实现订单状态流转：`PENDING_PAYMENT` → `PAID` → `GENERATING` → `COMPLETED`
+    - 实现订单状态流转：`PENDING_PAYMENT` → `GENERATING` → `COMPLETED` / `FAILED`（与 `OrderStatus` 枚举严格对齐，无 `PAID` 中间状态）
+    - 支付回调验签成功后直接将订单置为 `GENERATING` 并触发生成任务
     - _需求：5.5_
   - [ ] 13.4 订单列表接口
     - 实现 `GET /api/orders`：返回当前用户订单列表，含状态、套餐、创建时间
@@ -176,26 +181,28 @@
   - [ ] 15.7 生成任务失败重试测试
     - 验证 AI 调用失败时 BullMQ 自动重试；验证任务不丢失（Redis 持久化）
     - _需求：6.6_
+  - [ ] 15.8 微信消息通知（P2）*
+    - 实现 `apps/server/src/modules/notification/notification.service.ts`：生成完成后调用微信公众号模板消息接口，推送「论文已生成完成」通知（含论文标题、完成时间、跳转链接）
+    - 调用位置：`GenerationWorker.process()` 完成后 fire-and-forget，失败仅记录日志不影响主流程
+    - 写单元测试：Mock 微信模板消息 API，验证通知内容格式与调用时机
+    - _需求：6.8_
 
 - [ ] 16. 实现改稿模块（apps/server/src/modules/revision）
   - [ ] 16.1 改稿内容保存接口
     - 实现 `PATCH /api/orders/:id/revision`：保存用户在富文本编辑器中的手动编辑内容（存储为 HTML/JSON）
     - _需求：7.1_
   - [ ] 16.2 AI 改稿接口
-    - 实现 `POST /api/orders/:id/revision/ai`：对选中段落调用 AI 改稿，流式返回（SSE）；计入改稿次数
-    - _需求：7.2、7.3_
-  - [ ] 16.3 降 AI 痕迹接口
-    - 实现 `POST /api/orders/:id/revision/reduce-ai`：对选中段落调用降 AI 痕迹处理，流式返回；计入改稿次数
-    - _需求：7.2、7.3_
-  - [ ] 16.4 引用核对接口
-    - 实现 `POST /api/orders/:id/citation/check`：扫描正文，核对引用格式与文献列表一致性，返回 `CitationCheckResultDTO`
+    - 实现 `POST /api/orders/:id/revision/ai`：接受 `RevisionType` 枚举参数，统一处理按意见修改（`REWRITE`）、降重（`REDUCE_PLAGIARISM`）、降 AI 痕迹（`REDUCE_AI`）、扩写（`EXPAND`）、缩写（`SHRINK`）、润色（`POLISH`）六种操作，流式返回（SSE）；每次调用计入改稿次数
+    - _需求：7.2、7.3、7.4_
+  - [ ] 16.3 引用核对接口
+    - 实现 `POST /api/orders/:id/citation-check`：扫描正文，核对引用格式与文献列表一致性，返回 `CitationCheckResultDTO`
     - _需求：7.5_
-  - [ ] 16.5 加图/表接口（P2）*
+  - [ ] 16.4 加图/表接口（P2）*
     - 实现 `POST /api/orders/:id/revision/figure` 和 `POST /api/orders/:id/revision/table`：插入 AI 生成图表；此操作不计入改稿次数
     - _需求：7.6_
-  - [ ] 16.6 改稿模块单元测试
-    - 验证改稿次数计数逻辑（AI 改稿、降 AI 痕迹计入；加图/表不计入）；验证 SSE 流式输出
-    - _需求：7.3、7.6_
+  - [ ] 16.5 改稿模块单元测试
+    - 验证改稿次数计数逻辑（REWRITE/REDUCE_PLAGIARISM/REDUCE_AI/EXPAND/SHRINK/POLISH 计入；加图/表不计入）；验证 SSE 流式输出
+    - _需求：7.3、7.4_
 
 - [ ] 17. 实现 Word/PDF 文件生成与下载（apps/server/src/modules/revision）
   - [ ] 17.1 Word 文件生成
@@ -222,12 +229,16 @@
     - 实现 `LoginView.vue`：移动端显示微信授权按钮，PC 端显示微信扫码登录二维码
     - 登录成功后跳转至草稿列表或上次未完成的向导步骤
     - _需求：1.1、1.2_
-  - [ ] 20.2 登录状态守卫
+  - [ ] 20.2 首次引导（Onboarding）
+    - 实现 `components/common/OnboardingGuide.vue`：≤ 5 屏，每屏一句话说明主流程步骤，提供「跳过」和「下一步」按钮，最后一屏点击「开始写论文」进入步骤 1
+    - 配置路由守卫：已登录且 `onboarding_completed = false` 时跳转 `/onboarding`；完成或跳过后调用 `PATCH /api/users/me` 将 `onboarding_completed` 置为 `true`
+    - _需求：1.5_
+  - [ ] 20.3 登录状态守卫
     - 配置 Vue Router 导航守卫：未登录用户访问向导页自动跳转登录页
     - _需求：1.3_
-  - [ ] 20.3 登录页单元测试
-    - 验证登录成功跳转逻辑；验证未登录守卫重定向
-    - _需求：1.1、1.3_
+  - [ ] 20.4 登录页单元测试
+    - 验证登录成功跳转逻辑；验证未登录守卫重定向；验证 Onboarding 完成后不再展示
+    - _需求：11.1、11.5、1.5_
 
 - [ ] 21. 实现步骤 1 基础信息表单（apps/web/src/views/wizard/Step1BasicInfo.vue）
   - [ ] 21.1 表单字段实现
@@ -255,18 +266,24 @@
     - 调用 `GET /api/references/suggest`，展示推荐文献卡片（标题、作者、年份、来源）；支持一键添加
     - _需求：3.1、3.2_
   - [ ] 22.2 手动添加文献
-    - 支持粘贴 DOI/URL 自动解析；支持手动填写文献信息
-    - _需求：3.3_
+    - 支持粘贴知网引文格式（每行一条，提供格式示例）；支持上传题录文件（PDF/Word）；支持手动填写文献信息
+    - _需求：3.1_
   - [ ] 22.3 文献列表管理
     - 已选文献列表支持拖拽排序、删除；显示文献总数（建议 10～30 篇）
     - _需求：3.4_
-  - [ ] 22.4 步骤 2 单元测试
-    - 验证文献添加/删除逻辑；验证 DOI 解析调用
-    - _需求：3.3、3.4_
+  - [ ] 22.4 引文格式解析异常处理
+    - 实现粘贴知网引文格式时的解析异常标注：异常条目高亮显示并提示用户修改，不允许将格式异常文献加入确认列表
+    - _需求：3.6_
+  - [ ] 22.5 文献确认弹窗
+    - 实现文献数量满足建议后点击「下一步」弹出确认弹窗：列表展示已选文献标题、作者、来源，提供「返回修改」和「确认」按钮
+    - _需求：3.4、3.5_
+  - [ ] 22.6 步骤 2 单元测试
+    - 验证文献添加/删除逻辑；验证引文格式解析异常标注；验证确认弹窗触发条件
+    - _需求：3.4、3.6_
 
 - [ ] 23. 实现步骤 3 提纲编辑器（apps/web/src/views/wizard/Step3Outline.vue）
   - [ ] 23.1 AI 生成提纲触发
-    - 进入步骤 3 时自动调用 `POST /api/drafts/:id/outline/generate`，SSE 流式展示生成过程
+    - 进入步骤 3 时自动调用 `POST /api/outlines/generate`，SSE 流式展示生成过程
     - _需求：4.1、4.2_
   - [ ] 23.2 提纲树形编辑器
     - 实现可拖拽排序的树形提纲编辑器（章节/小节/子节，最多 3 级）；支持增删改节点
@@ -277,9 +294,12 @@
   - [ ] 23.4 重新生成提纲
     - 提供「重新生成」按钮，重新调用 AI 生成（覆盖当前提纲，需二次确认）
     - _需求：4.4_
-  - [ ] 23.5 步骤 3 单元测试
-    - 验证 SSE 流式接收与渲染；验证提纲节点增删改逻辑
-    - _需求：4.1、4.3_
+  - [ ] 23.5 提纲确认弹窗
+    - 实现点击「下一步」时弹出确认弹窗：展示已标记的图/表/公式/代码数量、预估生成字数，提供「返回修改」和「确定」按钮；点击「确定」后锁定提纲进入步骤 4
+    - _需求：4.7、4.8_
+  - [ ] 23.6 步骤 3 单元测试
+    - 验证 SSE 流式接收与渲染；验证提纲节点增删改逻辑；验证确认弹窗数据统计
+    - _需求：4.1、4.3、4.7_
 
 - [ ] 24. 实现步骤 4 预览与支付（apps/web/src/views/wizard/Step4Payment.vue）
   - [ ] 24.1 论文预览摘要
@@ -317,23 +337,26 @@
     - 显示剩余改稿次数（基础版 3 次）
     - _需求：7.2、7.3_
   - [ ] 27.3 降 AI 痕迹功能
-    - 选中段落后触发降 AI 痕迹，调用 `POST /api/orders/:id/revision/reduce-ai`，SSE 流式替换
+    - 选中段落后触发降 AI 痕迹，调用 `POST /api/orders/:id/revision/ai`（传入 `type: REDUCE_AI`），SSE 流式替换
     - _需求：7.4_
   - [ ] 27.4 加图/表功能（P2）*
     - 实现插入 AI 生成图表的入口，调用 `/revision/figure` 或 `/revision/table`；不计入改稿次数
     - _需求：7.6_
   - [ ] 27.5 引用核对面板
-    - 调用 `POST /api/orders/:id/citation/check`，展示引用核对结果，高亮问题引用
+    - 调用 `POST /api/orders/:id/citation-check`，展示引用核对结果，高亮问题引用
     - _需求：7.5_
   - [ ] 27.6 查重入口
     - 提供「发起查重」按钮，展示查重报告链接或结果摘要
     - _需求：7.7_
   - [ ] 27.7 下载论文
-    - 调用 `POST /api/orders/:id/download`，生成 Word 文件后提供下载链接
-    - _需求：8.1、8.2_
-  - [ ] 27.8 步骤 6 单元测试
-    - 验证改稿次数计数展示；验证 SSE 流式内容替换；验证下载触发逻辑
-    - _需求：7.2、7.3、8.1_
+    - 调用 `POST /api/orders/:id/download`，下载前检查用户是否已查看引用核对结果与查重结果；若未查看任一结果则阻止下载并提示；确认后生成 Word 文件提供下载链接
+    - _需求：7.7、7.8、8.1、8.2_
+  - [ ] 27.8 改稿内容自动保存
+    - 实现 Tiptap 编辑器内容变更后自动保存（防抖 2 秒），调用 `PATCH /api/orders/:id/revision`；页面刷新或意外关闭后内容不丢失
+    - _需求：7.9_
+  - [ ] 27.9 步骤 6 单元测试
+    - 验证改稿次数计数展示；验证 SSE 流式内容替换；验证下载前拦截逻辑；验证自动保存防抖触发
+    - _需求：7.2、7.3、7.7、7.9_
 
 - [ ] 28. 实现订单列表页（apps/web/src/views/orders）
   - 实现 `OrdersView.vue`：展示用户所有订单，含状态（生成中/已完成）、套餐、创建时间
