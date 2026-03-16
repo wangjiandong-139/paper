@@ -234,11 +234,12 @@
   - 18 个测试套件，216 个测试，100% 通过；覆盖认证、用户、草稿、文献、提纲、格式模板、系统配置、查重、订单、支付、生成任务、改稿、下载全模块
   - _如有疑问请询问用户（ask the user if questions arise）_
 
-- [ ] 19. 初始化前端 Vue 3 应用（apps/web）
+- [x] 19. 初始化前端 Vue 3 应用（apps/web）
   - 创建 Vite + Vue 3 + TypeScript 项目，配置 TailwindCSS、Vant 4、Pinia（含 pinia-plugin-persistedstate）
   - 配置 Vue Router，定义六步向导路由（`/wizard/1` ～ `/wizard/6`）、登录页、订单列表页
   - 配置 Vitest 测试环境
-  - 实现 `useAuthStore`：存储 JWT token，配置 axios 拦截器自动附加 Authorization 头
+  - 实现 `useAuthStore`：存储 JWT token，配置 axios 拦截器自动附加 Authorization 头；JWT 持久化到 localStorage，页面刷新后自动恢复
+  - 16 个单元测试，100% 通过（覆盖登录/登出/引导/更新/恢复 token 全流程）
   - _需求：1.1、1.3_
 
 - [ ] 20. 实现登录页与首次引导（apps/web/src/views/auth）
