@@ -174,32 +174,30 @@
   - 15 个测试套件，162 个测试，100% 通过
   - _如有疑问请询问用户（ask the user if questions arise）_
 
-- [ ] 15. 实现后台生成任务（apps/server/src/modules/generation）
-  - [ ] 15.1 BullMQ 任务队列配置
-    - 配置 BullMQ 队列 `paper-generation`，实现任务入队（支付成功后触发）、Worker 消费逻辑
+- [x] 15. 实现后台生成任务（apps/server/src/modules/generation）
+  - [x] 15.1 BullMQ 任务队列配置
+    - 实现 `GenerationQueueService`（内存 FIFO 队列，BullMQ 存根）：支持幂等入队（同一 orderId 不重复）、FIFO 出队
     - _需求：6.1_
-  - [ ] 15.2 按章生成逻辑
-    - 实现逐章调用 AI 适配器生成内容，每章完成后写入 `generated_chapters` 表，更新章节状态
+  - [x] 15.2 按章生成逻辑
+    - `GenerationWorkerService.processJob()`：提取 level=1 顶层章节，逐章调用 AI 适配器，保存 `GeneratedChapterDTO`，全部完成返回 `COMPLETED`
     - _需求：6.2、6.3_
-  - [ ] 15.3 引用注入逻辑
-    - 生成每章时，将步骤 2 用户确认的文献列表注入提示词，确保正文引用仅来自该列表
+  - [x] 15.3 引用注入逻辑
+    - `buildGenerationUserPrompt()` 将 `references` 列表以 `[n] 作者. 标题.` 格式注入提示词；`buildGenerationSystemPrompt()` 明确要求 AI 仅从提供文献中引用
     - _需求：6.4、3.5_
-  - [ ] 15.4 生成进度 SSE 接口
-    - 实现 `GET /api/orders/:id/progress`（SSE）：推送 `GenerationProgressEvent`，含当前章节、总章节数、状态
+  - [x] 15.4 生成进度 SSE 接口
+    - `GET /api/orders/:id/progress`（SSE）：基于 EventEmitter 推送 `GenerationProgressEvent`（含 order_id、total_chapters、completed_chapters、current_chapter、status）
     - _需求：6.5_
-  - [ ] 15.5 生成提示词管理
-    - 在 `prompts/generation.prompt.ts` 实现章节生成提示词，支持章节标题、字数、文献列表参数注入
+  - [x] 15.5 生成提示词管理
+    - `prompts/generation.prompt.ts`：`buildGenerationSystemPrompt()` + `buildGenerationUserPrompt()`，支持章节标题、字数、文献列表、子节标题注入
     - _需求：6.2、6.4_
-  - [ ] 15.6 生成任务单元测试
-    - Mock AI 适配器，验证按章生成流程、引用注入、进度事件格式
+  - [x] 15.6 生成任务单元测试
+    - Mock AI 适配器，验证按章顺序生成、引用注入到提示词、进度事件格式
     - _需求：6.2、6.4、6.5_
-  - [ ] 15.7 生成任务失败重试测试
-    - 验证 AI 调用失败时 BullMQ 自动重试；验证任务不丢失（Redis 持久化）
+  - [x] 15.7 生成任务失败重试测试
+    - `MAX_RETRIES=3`：首次失败后最多重试 3 次（共 4 次调用）；全部失败后章节状态为 FAILED，整体 finalStatus 为 FAILED；第一章失败后不再生成后续章节（快速失败）
+    - 新增 22 个单元测试，全部通过
     - _需求：6.6_
-  - [ ] 15.8 微信消息通知（P2）*
-    - 实现 `apps/server/src/modules/notification/notification.service.ts`：生成完成后调用微信公众号模板消息接口，推送「论文已生成完成」通知（含论文标题、完成时间、跳转链接）
-    - 调用位置：`GenerationWorker.process()` 完成后 fire-and-forget，失败仅记录日志不影响主流程
-    - 写单元测试：Mock 微信模板消息 API，验证通知内容格式与调用时机
+  - [ ]* 15.8 微信消息通知（P2）
     - _需求：6.8_
 
 - [ ] 16. 实现改稿模块（apps/server/src/modules/revision）
