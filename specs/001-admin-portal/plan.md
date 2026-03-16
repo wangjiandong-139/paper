@@ -7,7 +7,7 @@
 
 ## Summary
 
-构建一个仅面向内部运营团队的 PC 后台管理站，用于处理订单与生成任务、维护学校格式模板、管理后台账号与用户风控、更新第三方接口配置以及查看运营看板。技术方案采用独立 `apps/admin` Vue 3 应用配合 NestJS ` /api/admin/* ` 接口，复用 monorepo 的 PostgreSQL、Redis、BullMQ 和 `packages/shared` 契约层。
+构建一个仅面向内部运营团队的 PC 后台管理站，用于处理订单与生成任务、维护学校格式模板、管理后台账号与用户风控、更新第三方接口配置、查看运营看板，并管理商品版本与支付记录。技术方案采用独立 `apps/admin` Vue 3 应用配合 NestJS ` /api/admin/* ` 接口，复用 monorepo 的 PostgreSQL、Redis、BullMQ 和 `packages/shared` 契约层。
 
 ## Technical Context
 
@@ -19,7 +19,7 @@
 **Project Type**: Monorepo web application（独立后台前端 + NestJS API + shared contracts）  
 **Performance Goals**: 后台看板时间范围切换 p99 <= 5s；失败订单定位与重试操作 3 分钟内可完成；配置更新在下一次请求即生效  
 **Constraints**: 固定角色矩阵；后台账号使用 session/cookie；密钥永远脱敏显示；任务超 2 小时仅告警不自动终止；历史订单保留商品快照；禁止 `any`；必须 TDD  
-**Scale/Scope**: 初期 < 100,000 订单 / < 50,000 用户；新增 1 个 `apps/admin` 应用、若干 `apps/server` admin 模块与 shared DTO
+**Scale/Scope**: 初期 < 100,000 订单 / < 50,000 用户；新增 1 个 `apps/admin` 应用、若干 `apps/server` admin 模块（含商品与支付管理）与 shared DTO
 
 ## Constitution Check
 
@@ -74,6 +74,8 @@ apps/
     │   │   ├── admin-users/
     │   │   ├── admin-config/
     │   │   ├── admin-dashboard/
+    │   │   ├── admin-products/
+    │   │   ├── admin-payments/
     │   │   └── admin-logs/
     │   ├── adapters/
     │   ├── prisma/
@@ -90,7 +92,7 @@ packages/
         └── types/admin/
 ```
 
-**Structure Decision**: 在现有 `apps/web + apps/server + packages/shared` monorepo 上新增独立 `apps/admin`。这样可以隔离后台账号认证、PC-only 布局、内部菜单和发布节奏，同时继续复用 `apps/server` 与 `packages/shared`。
+**Structure Decision**: 在现有 `apps/web + apps/server + packages/shared` monorepo 上新增独立 `apps/admin`。这样可以隔离后台账号认证、PC-only 布局、内部菜单和发布节奏，同时继续复用 `apps/server` 与 `packages/shared`；后台业务能力按订单/模板/账号/配置/看板/商品/支付等 admin 模块拆分，避免将内部运营能力耦合进前台应用。
 
 ## Complexity Tracking
 

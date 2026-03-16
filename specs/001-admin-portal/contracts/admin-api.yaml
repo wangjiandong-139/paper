@@ -142,6 +142,27 @@ paths:
                 $ref: '#/components/schemas/AdminOrderDetail'
         '404':
           description: Order not found
+  /orders/{orderId}/note:
+    patch:
+      summary: Update order note
+      operationId: updateOrderNote
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderNoteUpdateRequest'
+      responses:
+        '200':
+          description: Order note updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminOrderDetail'
+        '404':
+          description: Order not found
   /orders/{orderId}/retry-generation:
     post:
       summary: Retry failed order generation
@@ -427,6 +448,33 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ApiConfig'
+  /configs/system:
+    get:
+      summary: Get system configuration
+      operationId: getSystemConfig
+      responses:
+        '200':
+          description: System config
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemConfig'
+    put:
+      summary: Update system configuration
+      operationId: updateSystemConfig
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SystemConfigUpdateRequest'
+      responses:
+        '200':
+          description: Updated system config
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemConfig'
   /configs/api/{configType}:
     put:
       summary: Upsert API configuration
@@ -478,6 +526,167 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FunnelResponse'
+  /dashboard/revenue:
+    get:
+      summary: Get revenue distribution
+      operationId: getDashboardRevenue
+      parameters:
+        - $ref: '#/components/parameters/TimeRange'
+      responses:
+        '200':
+          description: Revenue distribution
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevenueResponse'
+  /products:
+    get:
+      summary: Query products
+      operationId: listProducts
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - in: query
+          name: status
+          schema:
+            $ref: '#/components/schemas/ProductStatus'
+      responses:
+        '200':
+          description: Product list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductListResponse'
+    post:
+      summary: Create product
+      operationId: createProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductUpsertRequest'
+      responses:
+        '201':
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+  /products/{productId}:
+    patch:
+      summary: Update product
+      operationId: updateProduct
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductUpsertRequest'
+      responses:
+        '200':
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Product not found
+  /products/{productId}/activate:
+    post:
+      summary: Activate product
+      operationId: activateProduct
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '204':
+          description: Product activated
+  /products/{productId}/deactivate:
+    post:
+      summary: Deactivate product
+      operationId: deactivateProduct
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '204':
+          description: Product deactivated
+  /payments:
+    get:
+      summary: Query payments
+      operationId: listPayments
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - in: query
+          name: status
+          schema:
+            type: string
+        - in: query
+          name: from
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: to
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Payment list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentListResponse'
+  /payments/{paymentId}:
+    get:
+      summary: Get payment detail
+      operationId: getPaymentDetail
+      parameters:
+        - $ref: '#/components/parameters/PaymentId'
+      responses:
+        '200':
+          description: Payment detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentDetail'
+        '404':
+          description: Payment not found
+  /operation-logs:
+    get:
+      summary: Query operation logs
+      operationId: listOperationLogs
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - in: query
+          name: actionType
+          schema:
+            type: string
+        - in: query
+          name: targetType
+          schema:
+            type: string
+        - in: query
+          name: from
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: to
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Operation logs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationLogListResponse'
 components:
   parameters:
     Page:
@@ -530,6 +739,20 @@ components:
       schema:
         type: string
         format: uuid
+    ProductId:
+      in: path
+      name: productId
+      required: true
+      schema:
+        type: string
+        format: uuid
+    PaymentId:
+      in: path
+      name: paymentId
+      required: true
+      schema:
+        type: string
+        format: uuid
     TimeRange:
       in: query
       name: range
@@ -559,6 +782,9 @@ components:
     ApiConfigType:
       type: string
       enum: [PLAGIARISM, CITATION_CHECK]
+    ProductStatus:
+      type: string
+      enum: [ACTIVE, INACTIVE]
     AdminLoginRequest:
       type: object
       required: [username, password]
@@ -668,11 +894,20 @@ components:
         - $ref: '#/components/schemas/AdminOrderSummary'
         - type: object
           properties:
+            note:
+              type: string
             latestJob:
               $ref: '#/components/schemas/GenerationJobSummary'
             payment:
               type: object
               additionalProperties: true
+    OrderNoteUpdateRequest:
+      type: object
+      required: [note]
+      properties:
+        note:
+          type: string
+          maxLength: 2000
     SchoolTemplate:
       type: object
       properties:
@@ -830,6 +1065,35 @@ components:
         rateLimitConfig:
           type: object
           additionalProperties: true
+    SystemConfig:
+      type: object
+      properties:
+        maintenanceMode:
+          type: boolean
+        defaultWordCountOptions:
+          type: array
+          items:
+            type: integer
+        referenceCountSuggestions:
+          type: object
+          additionalProperties:
+            type: integer
+        updatedAt:
+          type: string
+          format: date-time
+    SystemConfigUpdateRequest:
+      type: object
+      properties:
+        maintenanceMode:
+          type: boolean
+        defaultWordCountOptions:
+          type: array
+          items:
+            type: integer
+        referenceCountSuggestions:
+          type: object
+          additionalProperties:
+            type: integer
     DashboardOverview:
       type: object
       properties:
@@ -853,3 +1117,149 @@ components:
                 type: string
               count:
                 type: integer
+    RevenueSlice:
+      type: object
+      properties:
+        label:
+          type: string
+        revenueFen:
+          type: integer
+        orderCount:
+          type: integer
+    RevenueResponse:
+      type: object
+      properties:
+        totalRevenueFen:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RevenueSlice'
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        productCode:
+          type: string
+        name:
+          type: string
+        status:
+          $ref: '#/components/schemas/ProductStatus'
+        priceFen:
+          type: integer
+        revisionLimit:
+          type: integer
+        aiRateThreshold:
+          type: number
+          format: float
+        description:
+          type: string
+        benefits:
+          type: object
+          additionalProperties: true
+    ProductUpsertRequest:
+      type: object
+      required: [productCode, name, priceFen, status, description]
+      properties:
+        productCode:
+          type: string
+        name:
+          type: string
+        status:
+          $ref: '#/components/schemas/ProductStatus'
+        priceFen:
+          type: integer
+        revisionLimit:
+          type: integer
+        aiRateThreshold:
+          type: number
+          format: float
+        description:
+          type: string
+        benefits:
+          type: object
+          additionalProperties: true
+    ProductListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+        total:
+          type: integer
+    PaymentSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        orderId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        productName:
+          type: string
+        amountFen:
+          type: integer
+        status:
+          type: string
+        paidAt:
+          type: string
+          format: date-time
+    PaymentDetail:
+      allOf:
+        - $ref: '#/components/schemas/PaymentSummary'
+        - type: object
+          properties:
+            provider:
+              type: string
+            channel:
+              type: string
+            transactionId:
+              type: string
+            rawPayload:
+              type: object
+              additionalProperties: true
+    PaymentListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentSummary'
+        total:
+          type: integer
+    OperationLogSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        actorAdminUserId:
+          type: string
+          format: uuid
+        actionType:
+          type: string
+        targetType:
+          type: string
+        targetId:
+          type: string
+        summary:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    OperationLogListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationLogSummary'
+        total:
+          type: integer
