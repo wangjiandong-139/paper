@@ -219,17 +219,19 @@
     - 新增 19 个单元测试，全部通过
     - _需求：7.3、7.4_
 
-- [ ] 17. 实现 Word/PDF 文件生成与下载（apps/server/src/modules/revision）
-  - [ ] 17.1 Word 文件生成
-    - 实现 `POST /api/orders/:id/download`：将最终论文内容按格式模板渲染为 `.docx` 文件，返回下载链接
-    - 使用 `docx` 或 `officegen` 库，应用 `FormatTemplate` 中的页边距、字体、行距参数
+- [x] 17. 实现 Word/PDF 文件生成与下载（apps/server/src/modules/download）
+  - [x] 17.1 Word 文件生成
+    - `DocumentBuilderService.build()`：使用 `docx` 库渲染 `.docx` 文件，应用 `FormatTemplate.config` 中的页边距（mm→twip）、字体、行距（1.5→360/240ths）参数
+    - `DownloadService.generateDownload()`：获取订单、取改稿内容、解析默认模板 config、调用构建器，返回 `{ download_url }` base64 data URL（生产环境替换为 OSS 预签名 URL）
+    - `POST /api/orders/:id/download`（支持 format: docx | pdf），受 JwtAuthGuard 保护，校验订单所有权
     - _需求：8.1、8.2_
-  - [ ] 17.2 PDF 导出（可选）
-    - 在 Word 生成完成后，通过 LibreOffice headless 或第三方服务转换为 PDF
+  - [x] 17.2 PDF 导出（存根）
+    - PDF 格式存根实现：复用 docx buffer，返回占位符 URL；生产环境可替换为 LibreOffice headless / Puppeteer
     - _需求：8.3_
 
-- [ ] 18. 检查点 — 后端全模块
+- [x] 18. 检查点 — 后端全模块
   - 验证：所有后端模块接口联调通过；生成→改稿→下载全链路可用；核心模块覆盖率 ≥ 80%
+  - 18 个测试套件，216 个测试，100% 通过；覆盖认证、用户、草稿、文献、提纲、格式模板、系统配置、查重、订单、支付、生成任务、改稿、下载全模块
   - _如有疑问请询问用户（ask the user if questions arise）_
 
 - [ ] 19. 初始化前端 Vue 3 应用（apps/web）
