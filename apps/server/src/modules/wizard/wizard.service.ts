@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ReferenceSource } from '../../../../../packages/shared/src/enums';
 import { OutlineNode } from '../outline/outline.service';
 
@@ -69,7 +69,7 @@ export class WizardService {
   ): Promise<Draft> {
     const draft = this.drafts.get(draftId);
     if (!draft || draft.user_id !== userId || draft.deleted_at) {
-      throw new Error('Draft not found');
+      throw new NotFoundException('Draft not found');
     }
 
     const next: Draft = { ...draft, updated_at: new Date() };
@@ -110,7 +110,7 @@ export class WizardService {
   ): Promise<Draft> {
     const draft = this.drafts.get(draftId);
     if (!draft || draft.user_id !== userId || draft.deleted_at) {
-      throw new Error('Draft not found');
+      throw new NotFoundException('Draft not found');
     }
 
     const step2 = (draft.step2_data ?? {}) as Record<string, unknown>;
@@ -135,7 +135,7 @@ export class WizardService {
   ): Promise<Draft> {
     const draft = this.drafts.get(draftId);
     if (!draft || draft.user_id !== userId || draft.deleted_at) {
-      throw new Error('Draft not found');
+      throw new NotFoundException('Draft not found');
     }
 
     const step2 = (draft.step2_data ?? {}) as Record<string, unknown>;
@@ -160,7 +160,7 @@ export class WizardService {
   ): Promise<Draft> {
     const draft = this.drafts.get(draftId);
     if (!draft || draft.user_id !== userId || draft.deleted_at) {
-      throw new Error('Draft not found');
+      throw new NotFoundException('Draft not found');
     }
 
     const step3 = (draft.step3_data ?? {}) as Record<string, unknown>;

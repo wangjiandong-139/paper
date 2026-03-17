@@ -344,8 +344,15 @@ async function handleSubmit(): Promise<void> {
   try {
     await wizardStore.saveStep1({ ...form.value })
     await router.push('/wizard/2')
-  } catch {
-    showToast('保存失败，请重试')
+  } catch (err: unknown) {
+    const status = err && typeof err === 'object' && 'response' in err && err.response && typeof (err.response as { status?: number }).status === 'number'
+      ? (err.response as { status: number }).status
+      : 0
+    if (status === 401) {
+      showToast('登录已过期，请重新登录')
+    } else {
+      showToast('保存失败，请重试')
+    }
   } finally {
     saving.value = false
   }

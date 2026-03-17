@@ -56,8 +56,22 @@ export const useWizardStore = defineStore('wizard', () => {
   }
 
   async function saveStep1(data: Step1Data): Promise<void> {
-    const draftId = await ensureCurrentDraft()
-    await http.patch(`/drafts/${draftId}/step/1`, data)
+    let draftId = await ensureCurrentDraft()
+    try {
+      await http.patch(`/drafts/${draftId}/step/1`, data)
+    } catch (err: unknown) {
+      const status = err && typeof err === 'object' && 'response' in err && err.response && typeof (err.response as { status?: number }).status === 'number'
+        ? (err.response as { status: number }).status
+        : 0
+      if (status === 404) {
+        drafts.value = drafts.value.filter((d) => d.id !== draftId)
+        currentDraftId.value = null
+        draftId = await ensureCurrentDraft()
+        await http.patch(`/drafts/${draftId}/step/1`, data)
+      } else {
+        throw err
+      }
+    }
     const draft = drafts.value.find((d) => d.id === draftId)
     if (draft) {
       draft.step1Data = data
