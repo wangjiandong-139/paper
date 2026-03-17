@@ -269,11 +269,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { showToast } from 'vant'
 import { useWizardStore } from '@/stores/wizard'
 import { useReferences } from '@/composables/useReferences'
+import { usePublicConfig } from '@/composables/usePublicConfig'
 import { DegreeType } from '@/types/wizard'
 import type { ReferenceItem } from '@/types/wizard'
 import { http } from '@/lib/http'
@@ -282,10 +283,11 @@ const router = useRouter()
 const wizardStore = useWizardStore()
 const saving = ref(false)
 
-// 从当前草稿的 step1Data 取学历类型
+const { config: publicConfig, fetchPublicConfig } = usePublicConfig()
 const degreeType = ref<DegreeType>(
   (wizardStore.step1Data?.degree_type as DegreeType) ?? DegreeType.UNDERGRADUATE,
 )
+const minReferenceCount = computed(() => publicConfig.value.minReferenceCount)
 
 const {
   selectedRefs,
@@ -306,7 +308,7 @@ const {
   clearParseResult,
   tryOpenConfirmDialog,
   closeConfirmDialog,
-} = useReferences({ degreeType })
+} = useReferences({ degreeType, minReferenceCount })
 
 const tabs = [
   { key: 'suggest', label: '推荐文献' },
@@ -361,6 +363,8 @@ async function handleConfirm(): Promise<void> {
 // ─── 初始化：加载推荐文献 & 恢复已选 ──────────────────────────────────────
 
 onMounted(async () => {
+  await fetchPublicConfig()
+
   // 恢复已选文献
   const saved = wizardStore.step2Data
   if (saved?.references.length) {

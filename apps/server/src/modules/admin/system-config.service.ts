@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 
 export interface SystemConfigDTO {
   key: string;
@@ -7,7 +7,7 @@ export interface SystemConfigDTO {
   updatedAt: Date;
 }
 
-type ConfigKey = 'plagiarism_provider' | 'ai_provider';
+type ConfigKey = 'plagiarism_provider' | 'ai_provider' | 'min_reference_count' | 'maintenance_mode';
 
 interface ConfigEntry {
   value: string;
@@ -18,6 +18,8 @@ interface ConfigEntry {
 const ALLOWED_KEYS: ReadonlySet<string> = new Set<ConfigKey>([
   'plagiarism_provider',
   'ai_provider',
+  'min_reference_count',
+  'maintenance_mode',
 ]);
 
 const PRESETS: Record<ConfigKey, Pick<ConfigEntry, 'value' | 'description'>> = {
@@ -28,6 +30,14 @@ const PRESETS: Record<ConfigKey, Pick<ConfigEntry, 'value' | 'description'>> = {
   ai_provider: {
     value: 'openai',
     description: '当前 AI 接口提供商（openai / deepseek）',
+  },
+  min_reference_count: {
+    value: '1',
+    description: '步骤 2 最低文献数量，正整数，默认 1',
+  },
+  maintenance_mode: {
+    value: 'false',
+    description: '维护模式（true/false），开启时阻止新建草稿与支付',
   },
 };
 
@@ -58,6 +68,18 @@ export class SystemConfigService {
   async set(key: string, value: string): Promise<SystemConfigDTO> {
     if (!ALLOWED_KEYS.has(key)) {
       throw new Error(`Unknown config key: "${key}". Allowed keys: ${[...ALLOWED_KEYS].join(', ')}`);
+    }
+    if (key === 'min_reference_count') {
+      const n = parseInt(value, 10);
+      if (Number.isNaN(n) || n < 1 || n !== Math.floor(n)) {
+        throw new BadRequestException('min_reference_count 必须为正整数（≥ 1）');
+      }
+      value = String(n);
+    }
+    if (key === 'maintenance_mode') {
+      if (value !== 'true' && value !== 'false') {
+        throw new BadRequestException('maintenance_mode 必须为 true 或 false');
+      }
     }
     const existing = this.store.get(key)!;
     const updated: ConfigEntry = { ...existing, value, updatedAt: new Date() };

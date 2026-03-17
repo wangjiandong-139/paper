@@ -32,7 +32,7 @@ describe('useReferences', () => {
       expect(count.value).toBe(0)
     })
 
-    it('meetsMinCount 为 false（count=0 < 10）', () => {
+    it('meetsMinCount 为 false（count=0 < minCount）', () => {
       const { meetsMinCount } = createHook()
       expect(meetsMinCount.value).toBe(false)
     })
@@ -45,10 +45,10 @@ describe('useReferences', () => {
 
   describe('minCount 按学历类型计算', () => {
     it.each([
-      [DegreeType.UNDERGRADUATE, 10],
-      [DegreeType.MASTER, 15],
-      [DegreeType.DOCTOR, 25],
-      [DegreeType.OTHER, 10],
+      [DegreeType.UNDERGRADUATE, 1],
+      [DegreeType.MASTER, 1],
+      [DegreeType.DOCTOR, 1],
+      [DegreeType.OTHER, 1],
     ])('%s minCount = %i', (degree, expected) => {
       const { minCount } = createHook(degree)
       expect(minCount.value).toBe(expected)

@@ -35,6 +35,7 @@ export interface SystemConfigDto {
   maintenanceMode: boolean
   defaultSuggestedTopic: string | null
   maxDailyGenerationDefault: number
+  minReferenceCount: number
 }
 
 export interface UpdateSystemConfigDto {

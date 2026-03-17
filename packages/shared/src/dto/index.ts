@@ -1,4 +1,5 @@
-export * from './admin/index';
+export * from './admin/index'
+export * from './public-config.dto'
 
 import { Language, PlanType } from '../enums';
 import {

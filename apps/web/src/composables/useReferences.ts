@@ -8,7 +8,10 @@ import type { ParsedCitationLine, CitationParseResult } from '@/utils/citation-p
 // ─── 类型 ──────────────────────────────────────────────────
 
 export interface UseReferencesOptions {
+  /** 学历类型（当未提供 minReferenceCount 时用于回退） */
   degreeType: Ref<DegreeType>
+  /** 最低文献数量固定值（来自 GET /api/config/public），优先于 degreeType */
+  minReferenceCount?: Ref<number>
 }
 
 export interface UseReferencesReturn {
@@ -35,7 +38,7 @@ export interface UseReferencesReturn {
 // ─── 组合式函数 ──────────────────────────────────────────────────
 
 export function useReferences(options: UseReferencesOptions): UseReferencesReturn {
-  const { degreeType } = options
+  const { degreeType, minReferenceCount } = options
 
   const selectedRefs = ref<ReferenceItem[]>([])
   const citationInput = ref('')
@@ -43,7 +46,9 @@ export function useReferences(options: UseReferencesOptions): UseReferencesRetur
   const showConfirmDialog = ref(false)
 
   const count = computed(() => selectedRefs.value.length)
-  const minCount = computed(() => getMinReferenceCount(degreeType.value))
+  const minCount = computed(() =>
+    minReferenceCount !== undefined ? minReferenceCount.value : getMinReferenceCount(degreeType.value),
+  )
   const meetsMinCount = computed(() => count.value >= minCount.value)
   const hasParseErrors = computed(() => (parseResult.value?.invalid.length ?? 0) > 0)
 

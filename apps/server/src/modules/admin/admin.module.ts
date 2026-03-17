@@ -6,10 +6,11 @@ import {
 } from '../../adapters/plagiarism/plagiarism.adapters';
 import { AdminConfigController } from './admin.controller';
 import { PlagiarismService } from './plagiarism.service';
+import { PublicConfigController } from './public-config.controller';
 import { SystemConfigService } from './system-config.service';
 
 @Module({
-  controllers: [AdminConfigController],
+  controllers: [AdminConfigController, PublicConfigController],
   providers: [
     SystemConfigService,
     PlagiarismService,

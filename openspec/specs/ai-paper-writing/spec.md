@@ -64,9 +64,9 @@
 系统 SHALL 在步骤 2 提供文献管理能力，使用户选定或导入的参考文献成为生成正文时的唯一引用来源，保证引用可溯源。
 
 - ReferenceManager SHALL 支持三种文献来源：系统推荐（按步骤 1 学科/主题，中文知网/万方/维普、英文 Semantic Scholar/CrossRef 等）、用户粘贴知网引文格式（每行一条，提供格式示例）、用户上传题录文件（PDF/Word）。
-- ReferenceManager SHALL 根据步骤 1 学历/类型显示文献数量建议（本科 10～15 篇、硕士 15～25 篇、博士 25 篇以上），并在底部实时显示「已选择文献 X 个」。
-- WHILE 已选文献数量未满足建议，ReferenceManager SHALL 将「下一步」置灰或显示「请至少选满 X 篇」。
-- WHEN 用户点击「下一步」且文献数量满足建议，ReferenceManager SHALL 弹出文献确认弹窗，展示已选文献标题、作者、来源，提供「返回修改」和「确认」。
+- ReferenceManager SHALL 在底部实时显示「已选择文献 X 个」；最低文献数量为运营后台「全局参数」中的固定配置值 `minReferenceCount`（默认 1），不按学历类型区分。
+- WHILE 已选文献数量 < `minReferenceCount`，ReferenceManager SHALL 将「下一步」置灰并显示「请至少添加 ${minReferenceCount} 篇文献」。
+- WHEN 用户点击「下一步」且文献数量 ≥ `minReferenceCount`，ReferenceManager SHALL 弹出文献确认弹窗，展示已选文献标题、作者、来源，提供「返回修改」和「确认」。
 - WHEN 用户在确认弹窗点击「确认」，ReferenceManager SHALL 将当前文献列表锁定为步骤 5 后台生成的唯一引用来源，并进入步骤 3。
 - IF 用户粘贴的引文格式存在解析异常，THEN ReferenceManager SHALL 标出异常条目并提示用户返回修改，不允许将格式异常的文献加入确认列表。
 

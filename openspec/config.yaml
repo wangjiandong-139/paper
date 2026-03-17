@@ -23,15 +23,22 @@ context: |
   - 禁止 any，前后端共享 DTO；AI 调用仅在 Service 层，提示词统一管理；向导状态持久化到服务端。
   - 质量门禁：测试全过、核心覆盖率 ≥80%、无 ESLint/TS 错误、无 any。
   - Constitution 全文见 .specify/memory/constitution.md；生成 artifact 时须符合其 Core Principles、技术栈约束与完工标准。
+  - 实现阶段 TDD 与任务写法详见 openspec/templates/implementation-tdd.md；单元测试为默认要求，不省略。
 
-# Per-artifact rules (aligned with .kiro/steering)
+# Per-artifact rules (aligned with .kiro/steering + constitution Test-First)
 rules:
   proposal:
     - 明确产品/功能范围与目标用户，与六步向导或后台能力对齐
     - 包含 Non-goals 或边界说明
   tasks:
-    - 任务可验证、可测试；先有测试或契约再实现
-    - 单任务尽量控制在 2 小时内可完成
+    - 任务可验证、可测试；单任务尽量控制在 2 小时内可完成
+    - **TDD 强制**：每个可测试的实现单元必须有对应的「先写测试」任务；任务列表中测试任务须排在对应实现任务之前，执行顺序为「先写测试（确认失败）→ 再写实现 → 测试通过」
+    - 单元测试为默认要求，不省略；后端 Service/工具函数用 Jest 单元测试，前端 composable/store/组件用 Vitest；接口/契约用集成或契约测试
+    - 任务描述中须标明测试文件路径（如 tests/unit/xxx.spec.ts、__tests__/xxx.spec.ts）与实现文件路径
+  implementation:
+    - 实现阶段严格按 TDD：先写当前任务的测试并运行（预期失败），再写实现代码，通过后勾选任务
+    - 每完成一个实现任务须运行相关测试并确保通过；禁止先写实现再补测试
+    - 单元测试：后端 Jest（apps/server）、前端 Vitest（apps/web）；可 Mock 外部依赖（HTTP、DB 可选 Mock），核心业务逻辑建议真实依赖或契约测试
   requirements:
     - 需求可追溯到用户故事或产品指标（完成率、支付转化率等）
   design:

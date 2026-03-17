@@ -133,20 +133,21 @@ describe('parseCitationText', () => {
 })
 
 describe('getMinReferenceCount', () => {
-  it('本科最少 10 篇', () => {
-    expect(getMinReferenceCount(DegreeType.UNDERGRADUATE)).toBe(10)
+  // 当前为方便测试统一为 1；后续改为从 admin 后端配置读取
+  it('本科最少文献数', () => {
+    expect(getMinReferenceCount(DegreeType.UNDERGRADUATE)).toBe(1)
   })
 
-  it('硕士最少 15 篇', () => {
-    expect(getMinReferenceCount(DegreeType.MASTER)).toBe(15)
+  it('硕士最少文献数', () => {
+    expect(getMinReferenceCount(DegreeType.MASTER)).toBe(1)
   })
 
-  it('博士最少 25 篇', () => {
-    expect(getMinReferenceCount(DegreeType.DOCTOR)).toBe(25)
+  it('博士最少文献数', () => {
+    expect(getMinReferenceCount(DegreeType.DOCTOR)).toBe(1)
   })
 
-  it('其他最少 10 篇', () => {
-    expect(getMinReferenceCount(DegreeType.OTHER)).toBe(10)
+  it('其他最少文献数', () => {
+    expect(getMinReferenceCount(DegreeType.OTHER)).toBe(1)
   })
 
   it('REFERENCE_MIN_COUNT 覆盖所有 DegreeType', () => {

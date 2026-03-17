@@ -121,14 +121,15 @@ export function parseCitationText(text: string): CitationParseResult {
 }
 
 // ─── 最少文献数量建议 ──────────────────────────────────────────────────
+// 方便测试暂定为 1；后续改为从 admin 后端配置（全局参数「文献数量建议」）读取。
 
 import { DegreeType } from '@/types/wizard'
 
 export const REFERENCE_MIN_COUNT: Record<DegreeType, number> = {
-  [DegreeType.UNDERGRADUATE]: 10,
-  [DegreeType.MASTER]: 15,
-  [DegreeType.DOCTOR]: 25,
-  [DegreeType.OTHER]: 10,
+  [DegreeType.UNDERGRADUATE]: 1,
+  [DegreeType.MASTER]: 1,
+  [DegreeType.DOCTOR]: 1,
+  [DegreeType.OTHER]: 1,
 }
 
 export const REFERENCE_SUGGEST_MAX: Record<DegreeType, number> = {
@@ -139,5 +140,5 @@ export const REFERENCE_SUGGEST_MAX: Record<DegreeType, number> = {
 }
 
 export function getMinReferenceCount(degreeType: DegreeType): number {
-  return REFERENCE_MIN_COUNT[degreeType] ?? 10
+  return REFERENCE_MIN_COUNT[degreeType] ?? 1
 }
