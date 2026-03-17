@@ -6,7 +6,12 @@
 import { AuthService } from '../src/modules/auth/auth.service'
 
 function makeService(): AuthService {
-  return new AuthService({} as never)
+  return new AuthService(
+    {} as never,
+    { get: async () => null } as never,
+    {} as never,
+    {} as never,
+  )
 }
 
 describe('AuthService - password hash and verify', () => {

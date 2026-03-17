@@ -11,7 +11,8 @@
     "jsxImportSource": "vue",
     "noEmit": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@ai-paper/shared": ["../../packages/shared/src/index.ts"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue"],

@@ -27,6 +27,29 @@
         <label class="text-xs text-gray-500">默认单日生成上限</label>
         <input v-model.number="form.maxDailyGenerationDefault" type="number" min="1" class="input-field w-32 text-sm" />
       </div>
+      <div class="border-t border-gray-200 pt-4 mt-4">
+        <p class="text-sm font-medium text-gray-700 mb-2">微信开放平台（网站应用扫码登录）</p>
+        <div class="flex flex-col gap-1 mb-3">
+          <label class="text-xs text-gray-500">AppID</label>
+          <input
+            v-model="form.wechatOpenAppId"
+            type="text"
+            class="input-field text-sm"
+            placeholder="微信开放平台网站应用 AppID"
+          />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs text-gray-500">AppSecret</label>
+          <input
+            v-model="form.wechatOpenAppSecret"
+            type="password"
+            class="input-field text-sm"
+            :placeholder="wechatSecretConfigured ? '已配置，留空不修改' : '微信开放平台网站应用 AppSecret'"
+            autocomplete="new-password"
+          />
+          <p v-if="wechatSecretConfigured" class="text-xs text-gray-400">当前已配置，仅在后端使用，不展示明文</p>
+        </div>
+      </div>
       <button class="btn-primary text-xs" :disabled="isSaving" @click="handleSave">
         {{ isSaving ? '保存中...' : '保存配置' }}
       </button>
@@ -45,17 +68,22 @@ interface SystemConfigForm {
   defaultSuggestedTopic: string | null
   maxDailyGenerationDefault: number
   minReferenceCount: number
+  wechatOpenAppId: string
+  wechatOpenAppSecret: string
 }
 
 const isLoading = ref(false)
 const isSaving = ref(false)
 const saved = ref(false)
 const saveError = ref('')
+const wechatSecretConfigured = ref(false)
 const form = ref<SystemConfigForm>({
   maintenanceMode: false,
   defaultSuggestedTopic: null,
   maxDailyGenerationDefault: 5,
   minReferenceCount: 1,
+  wechatOpenAppId: '',
+  wechatOpenAppSecret: '',
 })
 
 async function loadConfig(): Promise<void> {
@@ -65,11 +93,14 @@ async function loadConfig(): Promise<void> {
     const list = Array.isArray(res.data) ? res.data : []
     const byKey: Record<string, string> = {}
     list.forEach((item) => { byKey[item.key] = item.value })
+    wechatSecretConfigured.value = byKey.wechat_open_app_secret === '****'
     form.value = {
       maintenanceMode: byKey.maintenance_mode === 'true',
       defaultSuggestedTopic: form.value.defaultSuggestedTopic,
       maxDailyGenerationDefault: form.value.maxDailyGenerationDefault,
       minReferenceCount: Math.max(1, parseInt(byKey.min_reference_count ?? '1', 10) || 1),
+      wechatOpenAppId: byKey.wechat_open_app_id ?? '',
+      wechatOpenAppSecret: '',
     }
   } catch {
     // 保持默认值
@@ -90,6 +121,10 @@ async function handleSave(): Promise<void> {
   try {
     await adminApi.patch('/system-configs/min_reference_count', { value: String(form.value.minReferenceCount) })
     await adminApi.patch('/system-configs/maintenance_mode', { value: form.value.maintenanceMode ? 'true' : 'false' })
+    await adminApi.patch('/system-configs/wechat_open_app_id', { value: form.value.wechatOpenAppId.trim() })
+    if (form.value.wechatOpenAppSecret) {
+      await adminApi.patch('/system-configs/wechat_open_app_secret', { value: form.value.wechatOpenAppSecret })
+    }
     saved.value = true
     setTimeout(() => { saved.value = false }, 2000)
   } catch (e: unknown) {

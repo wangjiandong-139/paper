@@ -7,7 +7,15 @@ export interface SystemConfigDTO {
   updatedAt: Date;
 }
 
-type ConfigKey = 'plagiarism_provider' | 'ai_provider' | 'min_reference_count' | 'maintenance_mode';
+const SENSITIVE_KEYS = new Set<string>(['wechat_open_app_secret']);
+
+type ConfigKey =
+  | 'plagiarism_provider'
+  | 'ai_provider'
+  | 'min_reference_count'
+  | 'maintenance_mode'
+  | 'wechat_open_app_id'
+  | 'wechat_open_app_secret';
 
 interface ConfigEntry {
   value: string;
@@ -20,6 +28,8 @@ const ALLOWED_KEYS: ReadonlySet<string> = new Set<ConfigKey>([
   'ai_provider',
   'min_reference_count',
   'maintenance_mode',
+  'wechat_open_app_id',
+  'wechat_open_app_secret',
 ]);
 
 const PRESETS: Record<ConfigKey, Pick<ConfigEntry, 'value' | 'description'>> = {
@@ -38,6 +48,14 @@ const PRESETS: Record<ConfigKey, Pick<ConfigEntry, 'value' | 'description'>> = {
   maintenance_mode: {
     value: 'false',
     description: '维护模式（true/false），开启时阻止新建草稿与支付',
+  },
+  wechat_open_app_id: {
+    value: '',
+    description: '微信开放平台网站应用 AppID',
+  },
+  wechat_open_app_secret: {
+    value: '',
+    description: '微信开放平台网站应用 AppSecret，仅后端使用',
   },
 };
 
@@ -59,7 +77,7 @@ export class SystemConfigService {
   async listAll(): Promise<SystemConfigDTO[]> {
     return Array.from(this.store.entries()).map(([key, entry]) => ({
       key,
-      value: entry.value,
+      value: SENSITIVE_KEYS.has(key) ? (entry.value ? '****' : '') : entry.value,
       description: entry.description,
       updatedAt: entry.updatedAt,
     }));

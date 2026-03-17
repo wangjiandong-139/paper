@@ -1,5 +1,6 @@
 export * from './admin/index'
 export * from './public-config.dto'
+export * from './wechat.dto'
 
 import { Language, PlanType } from '../enums';
 import {

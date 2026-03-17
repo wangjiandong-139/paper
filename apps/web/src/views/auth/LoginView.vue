@@ -46,6 +46,16 @@
               alt="微信扫码登录"
               class="w-40 h-40 rounded-lg"
             />
+            <div v-else-if="qrcodeExpired" class="text-center px-2">
+              <div class="text-gray-300 text-4xl mb-2">⏱</div>
+              <p class="text-xs text-gray-400">二维码已过期</p>
+              <button
+                class="text-xs text-[#07c160] mt-2 underline"
+                @click="refreshQrcode"
+              >
+                刷新
+              </button>
+            </div>
             <div v-else class="text-center px-2">
               <div class="text-gray-300 text-4xl mb-2">📷</div>
               <p class="text-xs text-gray-400">暂未开启扫码登录</p>
@@ -106,7 +116,9 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { showToast } from 'vant'
+import QRCode from 'qrcode'
 import { useAuthStore } from '@/stores/auth'
+import type { WechatPollDto } from '@ai-paper/shared'
 
 const router = useRouter()
 const route = useRoute()
@@ -115,6 +127,8 @@ const loading = ref(false)
 const passwordLoading = ref(false)
 const qrcodeLoading = ref(false)
 const qrcodeUrl = ref<string | null>(null)
+const qrcodeState = ref<string | null>(null)
+const qrcodeExpired = ref(false)
 const username = ref('')
 const password = ref('')
 let pollingTimer: ReturnType<typeof setInterval> | null = null
@@ -175,27 +189,50 @@ async function redirectAfterLogin(): Promise<void> {
 }
 
 async function refreshQrcode(): Promise<void> {
+  qrcodeExpired.value = false
+  qrcodeUrl.value = null
+  qrcodeState.value = null
+  if (pollingTimer) {
+    clearInterval(pollingTimer)
+    pollingTimer = null
+  }
   qrcodeLoading.value = true
   try {
+    const { http } = await import('@/lib/http')
+    const { data } = await http.get<{ url: string | null; state: string | null }>('/auth/wechat/qrcode')
+    if (data?.url && data?.state) {
+      qrcodeUrl.value = await QRCode.toDataURL(data.url, { width: 160, margin: 1 })
+      qrcodeState.value = data.state
+      startQrcodePolling(data.state)
+    }
+  } catch {
     qrcodeUrl.value = null
-    startQrcodePolling()
   } finally {
     qrcodeLoading.value = false
   }
 }
 
-function startQrcodePolling(): void {
+function startQrcodePolling(state: string): void {
   if (pollingTimer) clearInterval(pollingTimer)
   pollingTimer = setInterval(async () => {
     try {
-      const { data } = await import('@/lib/http').then((m) =>
-        m.http.get<{ status: string; token?: string; user?: unknown }>('/auth/wechat/qrcode/poll'),
-      )
-      if (data.status === 'confirmed' && data.token) {
-        clearInterval(pollingTimer!)
-        authStore.token = data.token as string
-        authStore.user = data.user as typeof authStore.user
-        import('@/lib/http').then((m) => m.setAuthToken(data.token!))
+      const { http } = await import('@/lib/http')
+      const { data } = await http.get<WechatPollDto>(`/auth/wechat/qrcode/poll?state=${encodeURIComponent(state)}`)
+      if (data.status === 'expired') {
+        if (pollingTimer) clearInterval(pollingTimer)
+        pollingTimer = null
+        qrcodeExpired.value = true
+        qrcodeUrl.value = null
+        qrcodeState.value = null
+        return
+      }
+      if (data.status === 'confirmed' && data.token && data.user) {
+        if (pollingTimer) clearInterval(pollingTimer)
+        pollingTimer = null
+        authStore.token = data.token
+        authStore.user = data.user
+        const { setAuthToken } = await import('@/lib/http')
+        setAuthToken(data.token)
         await redirectAfterLogin()
       }
     } catch {
@@ -208,17 +245,7 @@ onMounted(async () => {
   isMobile.value = detectMobile()
 
   if (!isMobile.value) {
-    qrcodeLoading.value = true
-    try {
-      const { http } = await import('@/lib/http')
-      const { data } = await http.get<{ url: string | null }>('/auth/wechat/qrcode')
-      qrcodeUrl.value = data?.url ?? null
-      if (qrcodeUrl.value) startQrcodePolling()
-    } catch {
-      qrcodeUrl.value = null
-    } finally {
-      qrcodeLoading.value = false
-    }
+    await refreshQrcode()
   }
 })
 
