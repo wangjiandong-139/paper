@@ -2,6 +2,10 @@
 
 本文档说明在本项目中如何配合使用 Speckit 和 OpenSpec，以及如何保持文档一致性。
 
+## 开发路线说明
+
+**本项目后续不再使用 Kiro 进行新需求或新功能开发。** 规范与实现均以 **Speckit + OpenSpec** 为准：主规范源为 `openspec/specs/`，新功能走 Speckit（`specs/<NNN-feature>/`）或 OpenSpec 变更（`openspec/changes/<name>/`）。`.kiro/specs/` 下已有内容已完成迁移至 `openspec/specs/ai-paper-writing/spec.md`，仅作历史参考；澄清、设计与任务分解仍可查阅 `.kiro/specs/ai-paper-writing/`。
+
 ## 规范源与目录约定
 
 - **主规范源**：`openspec/specs/<capability>/spec.md`  

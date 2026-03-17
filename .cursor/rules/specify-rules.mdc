@@ -39,10 +39,19 @@ TypeScript 5.x（前端 Vue 3、后端 NestJS 10）: Follow standard conventions
 
 ## Recent Changes
 - 001-admin-portal: Added TypeScript 5.x（前端 Vue 3、后端 NestJS 10） + Vue 3, Vite, Pinia, TailwindCSS, NestJS, Prisma, PostgreSQL, Redis, BullMQ
-
 - 001-admin-portal: Added TypeScript 5.x（前端 Vue 3、后端 NestJS 10） + Vue 3, Vite, Pinia, TailwindCSS, NestJS, Prisma, PostgreSQL, Redis, BullMQ
+- 001-admin-portal: Added TypeScript 5.x（前端 Vue 3、后端 NestJS 10） + Vue 3, Vite, Pinia, TailwindCSS, NestJS, Prisma, PostgreSQL, Redis, BullMQ
+
 
 （Recent Changes 同时考虑 specs/ 下 feature 与 openspec/specs/ 下 capability 的变更。）
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
+
+## Active Capabilities (openspec/specs/)
+
+- admin-portal, ai-paper-writing
+
+## Active Capabilities (openspec/specs/)
+
+- admin-portal, ai-paper-writing
