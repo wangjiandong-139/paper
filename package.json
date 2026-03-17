@@ -16,8 +16,8 @@
     "admin:test": "pnpm --filter @ai-paper/admin test"
   },
   "devDependencies": {
-    "@types/node": "^20.11.24",
     "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.24",
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.29.0",
@@ -29,5 +29,8 @@
     "prettier": "^3.2.5",
     "ts-jest": "^29.1.2",
     "typescript": "^5.6.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.3.1"
   }
 }
