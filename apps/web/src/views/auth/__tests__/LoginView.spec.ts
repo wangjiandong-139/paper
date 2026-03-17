@@ -12,10 +12,12 @@ vi.mock('vue-router', () => ({
 }))
 
 const mockLoginWithWechat = vi.fn()
+const mockLoginWithPassword = vi.fn()
 const mockAuthStore = {
   isAuthenticated: false,
   needsOnboarding: false,
   loginWithWechat: mockLoginWithWechat,
+  loginWithPassword: mockLoginWithPassword,
   token: null as string | null,
   user: null as unknown,
 }
@@ -59,6 +61,10 @@ function createWrapper(isMobileUA = false) {
           template: '<button @click="$emit(\'click\')" :data-loading="loading"><slot /></button>',
           props: ['loading'],
         },
+        'van-field': {
+          template: '<input v-bind="$attrs" :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
+          props: ['modelValue'],
+        },
       },
     },
   })
@@ -69,6 +75,7 @@ describe('LoginView', () => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
     mockLoginWithWechat.mockResolvedValue(undefined)
+    mockLoginWithPassword.mockResolvedValue(undefined)
     mockPush.mockResolvedValue(undefined)
     mockAuthStore.isAuthenticated = false
     mockAuthStore.needsOnboarding = false
@@ -173,6 +180,52 @@ describe('LoginView', () => {
       await wrapper.find('[data-testid="wechat-login-btn"]').trigger('click')
       await flushPromises()
       expect(mockShowToast).toHaveBeenCalledWith('登录失败，请重试')
+    })
+  })
+
+  describe('密码登录', () => {
+    it('显示用户名、密码输入框和密码登录按钮', async () => {
+      const wrapper = createWrapper(false)
+      await flushPromises()
+      expect(wrapper.find('[data-testid="username-input"]').exists()).toBe(true)
+      expect(wrapper.find('[data-testid="password-input"]').exists()).toBe(true)
+      expect(wrapper.find('[data-testid="password-login-btn"]').exists()).toBe(true)
+    })
+
+    it('输入用户名密码后点击密码登录，调用 loginWithPassword 并跳转', async () => {
+      mockAuthStore.needsOnboarding = false
+      mockRouteQuery.redirect = ''
+      const wrapper = createWrapper(false)
+      await flushPromises()
+      await wrapper.find('[data-testid="username-input"]').setValue('user')
+      await wrapper.find('[data-testid="password-input"]').setValue('1')
+      await wrapper.find('[data-testid="password-login-btn"]').trigger('click')
+      await flushPromises()
+      expect(mockLoginWithPassword).toHaveBeenCalledWith('user', '1')
+      expect(mockPush).toHaveBeenCalledWith('/wizard/1')
+    })
+
+    it('密码登录成功后跳转 redirect 指定路由', async () => {
+      mockAuthStore.needsOnboarding = false
+      mockRouteQuery.redirect = '/orders'
+      const wrapper = createWrapper(false)
+      await flushPromises()
+      await wrapper.find('[data-testid="username-input"]').setValue('user')
+      await wrapper.find('[data-testid="password-input"]').setValue('1')
+      await wrapper.find('[data-testid="password-login-btn"]').trigger('click')
+      await flushPromises()
+      expect(mockPush).toHaveBeenCalledWith('/orders')
+    })
+
+    it('密码登录失败时显示用户名或密码错误', async () => {
+      mockLoginWithPassword.mockRejectedValue(new Error('Unauthorized'))
+      const wrapper = createWrapper(false)
+      await flushPromises()
+      await wrapper.find('[data-testid="username-input"]').setValue('wrong')
+      await wrapper.find('[data-testid="password-input"]').setValue('wrong')
+      await wrapper.find('[data-testid="password-login-btn"]').trigger('click')
+      await flushPromises()
+      expect(mockShowToast).toHaveBeenCalledWith('用户名或密码错误')
     })
   })
 })

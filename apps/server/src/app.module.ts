@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
+import { PrismaModule } from './common/prisma.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { DownloadModule } from './modules/download/download.module';
@@ -13,7 +14,7 @@ import { UserModule } from './modules/user/user.module';
 import { WizardModule } from './modules/wizard/wizard.module';
 
 @Module({
-  imports: [AuthModule, UserModule, WizardModule, ReferenceModule, OutlineModule, TemplateModule, AdminModule, OrderModule, GenerationModule, RevisionModule, DownloadModule],
+  imports: [PrismaModule, AuthModule, UserModule, WizardModule, ReferenceModule, OutlineModule, TemplateModule, AdminModule, OrderModule, GenerationModule, RevisionModule, DownloadModule],
   controllers: [AppController],
   providers: [],
 })

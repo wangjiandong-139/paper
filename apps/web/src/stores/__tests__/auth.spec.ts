@@ -125,6 +125,41 @@ describe('useAuthStore', () => {
     })
   })
 
+  describe('loginWithPassword', () => {
+    it('登录成功后存储 token 和 user', async () => {
+      mockHttp.post = vi.fn().mockResolvedValue({
+        data: { token: MOCK_TOKEN, user: MOCK_USER },
+      })
+
+      const store = useAuthStore()
+      await store.loginWithPassword('user', '1')
+
+      expect(mockHttp.post).toHaveBeenCalledWith('/auth/login', { username: 'user', password: '1' })
+      expect(store.token).toBe(MOCK_TOKEN)
+      expect(store.user).toEqual(MOCK_USER)
+    })
+
+    it('登录成功后调用 setAuthToken', async () => {
+      mockHttp.post = vi.fn().mockResolvedValue({
+        data: { token: MOCK_TOKEN, user: MOCK_USER },
+      })
+
+      const store = useAuthStore()
+      await store.loginWithPassword('user', '1')
+
+      expect(mockSetAuthToken).toHaveBeenCalledWith(MOCK_TOKEN)
+    })
+
+    it('登录失败时抛出错误，保持未登录态', async () => {
+      mockHttp.post = vi.fn().mockRejectedValue(new Error('Unauthorized'))
+
+      const store = useAuthStore()
+      await expect(store.loginWithPassword('wrong', 'wrong')).rejects.toThrow('Unauthorized')
+      expect(store.token).toBeNull()
+      expect(store.user).toBeNull()
+    })
+  })
+
   describe('completeOnboarding', () => {
     it('调用 PATCH /users/me 并更新 user.onboardingCompleted', async () => {
       mockHttp.post = vi.fn().mockResolvedValue({

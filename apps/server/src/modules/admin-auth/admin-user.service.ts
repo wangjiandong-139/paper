@@ -4,7 +4,7 @@ import {
   BadRequestException,
   ConflictException,
 } from '@nestjs/common'
-import * as bcrypt from 'bcrypt'
+import * as bcrypt from 'bcryptjs'
 import { AdminRole, AdminUserStatus } from '@ai-paper/shared'
 
 export interface AdminUserRecord {

@@ -61,6 +61,36 @@
         </div>
       </template>
 
+      <!-- 用户名密码登录（与微信并列） -->
+      <div class="mt-6 pt-6 border-t border-gray-100">
+        <p class="text-gray-500 text-sm mb-3">或使用用户名密码登录</p>
+        <van-field
+          v-model="username"
+          name="username"
+          label="用户名"
+          placeholder="请输入用户名"
+          data-testid="username-input"
+        />
+        <van-field
+          v-model="password"
+          type="password"
+          name="password"
+          label="密码"
+          placeholder="请输入密码"
+          data-testid="password-input"
+        />
+        <van-button
+          type="primary"
+          block
+          :loading="passwordLoading"
+          data-testid="password-login-btn"
+          class="mt-4 rounded-xl"
+          @click="handlePasswordLogin"
+        >
+          密码登录
+        </van-button>
+      </div>
+
       <p class="text-center text-xs text-gray-300 mt-8">
         登录即代表同意
         <a href="#" class="text-gray-400 underline">《用户协议》</a>
@@ -81,11 +111,30 @@ const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const loading = ref(false)
+const passwordLoading = ref(false)
 const qrcodeLoading = ref(false)
 const qrcodeUrl = ref<string | null>(null)
+const username = ref('')
+const password = ref('')
 let pollingTimer: ReturnType<typeof setInterval> | null = null
 
 const isMobile = ref(false)
+
+async function handlePasswordLogin(): Promise<void> {
+  if (!username.value.trim() || !password.value) {
+    showToast('请输入用户名和密码')
+    return
+  }
+  passwordLoading.value = true
+  try {
+    await authStore.loginWithPassword(username.value.trim(), password.value)
+    await redirectAfterLogin()
+  } catch {
+    showToast('用户名或密码错误')
+  } finally {
+    passwordLoading.value = false
+  }
+}
 
 function detectMobile(): boolean {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(

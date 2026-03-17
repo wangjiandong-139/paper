@@ -15,6 +15,9 @@ export interface WechatLoginResponseDTO {
   user: UserInfo
 }
 
+/** 与微信登录响应形态一致，前端可复用 */
+export type LoginResponseDTO = WechatLoginResponseDTO
+
 export const useAuthStore = defineStore(
   'auth',
   () => {
@@ -33,6 +36,12 @@ export const useAuthStore = defineStore(
 
     async function loginWithWechat(code: string): Promise<void> {
       const { data } = await http.post<WechatLoginResponseDTO>('/auth/wechat', { code })
+      user.value = data.user
+      _applyToken(data.token)
+    }
+
+    async function loginWithPassword(username: string, password: string): Promise<void> {
+      const { data } = await http.post<LoginResponseDTO>('/auth/login', { username, password })
       user.value = data.user
       _applyToken(data.token)
     }
@@ -67,6 +76,7 @@ export const useAuthStore = defineStore(
       isAuthenticated,
       needsOnboarding,
       loginWithWechat,
+      loginWithPassword,
       completeOnboarding,
       updateProfile,
       logout,

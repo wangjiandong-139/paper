@@ -2,6 +2,8 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// Seed: pnpm exec prisma db seed
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -112,9 +114,21 @@ model User {
   updated_at           DateTime  @updatedAt
   deleted_at           DateTime?
 
-  drafts      Draft[]
-  orders      Order[]
-  riskControl UserRiskControl?
+  drafts           Draft[]
+  orders           Order[]
+  riskControl      UserRiskControl?
+  localCredentials LocalCredential?
+}
+
+model LocalCredential {
+  id            String   @id @default(uuid())
+  user_id       String   @unique
+  username      String   @unique
+  password_hash String
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id])
 }
 
 model Draft {
