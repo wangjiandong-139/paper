@@ -152,9 +152,11 @@ async function handlePasswordLogin(): Promise<void> {
 }
 
 function detectMobile(): boolean {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent,
-  )
+  const ua = navigator.userAgent
+  const isWeChat = /MicroMessenger/i.test(ua)
+  const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)
+  // 只要是在微信内置浏览器（包括 PC 微信），一律按“移动端”处理，方便测试 H5 登录
+  return isMobileUA || isWeChat
 }
 
 async function handleMobileLogin(): Promise<void> {
