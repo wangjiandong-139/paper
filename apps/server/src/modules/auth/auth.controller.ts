@@ -35,6 +35,14 @@ export class AuthController {
     return this.authService.getWechatPoll(state ?? '');
   }
 
+  /** 开发环境专用：手动将某个 state 标记为已确认，便于本地测试扫码登录 */
+  @Get('wechat/dev-confirm')
+  async wechatDevConfirm(
+    @Query('state') state: string,
+  ): Promise<{ ok: boolean }> {
+    return this.authService.devConfirmState(state ?? '');
+  }
+
   @Post('wechat')
   async wechatLogin(@Body() body: WechatLoginPayload): Promise<AuthResult> {
     return this.authService.wechatLogin(body);

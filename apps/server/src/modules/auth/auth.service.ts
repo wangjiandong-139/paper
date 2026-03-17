@@ -85,6 +85,7 @@ export class AuthService {
    */
   async handleWechatCallback(code: string, state: string): Promise<{ redirectUrl: string }> {
     const frontendUrl = process.env.FRONTEND_URL ?? '';
+    const isDevMock = process.env.WECHAT_DEV_MODE === 'true' || process.env.NODE_ENV !== 'production';
     const loginPath = '/login';
     const fallbackRedirect = frontendUrl ? `${frontendUrl.replace(/\/$/, '')}${loginPath}` : loginPath;
 
@@ -92,6 +93,36 @@ export class AuthService {
     if (!entry || entry.status !== 'pending') {
       return { redirectUrl: `${fallbackRedirect}?wechat_error=invalid_state` };
     }
+
+    // 开发 / 测试环境：不调用微信接口，直接模拟登录，方便本地调试扫码流程
+    if (isDevMock) {
+      const openId = `dev-openid-${state}`;
+      let user = await this.prisma.user.findUnique({
+        where: { wechat_open_id: openId },
+      });
+      if (!user) {
+        user = await this.prisma.user.create({
+          data: {
+            wechat_open_id: openId,
+            wechat_union_id: null,
+            nickname: '本地测试用户',
+            avatar_url: null,
+          },
+        });
+      }
+      const token = `wechat-dev-${randomUUID()}`;
+      const loginUser = {
+        userId: user.id,
+        wechatOpenId: user.wechat_open_id,
+        nickname: user.nickname,
+        avatarUrl: user.avatar_url,
+        onboardingCompleted: user.onboarding_completed,
+      };
+      this.wechatState.setConfirmed(state, token, loginUser);
+      const redirectUrl = `${fallbackRedirect}?wechat_done=1&state=${encodeURIComponent(state)}&dev=1`;
+      return { redirectUrl };
+    }
+
     if (!code?.trim()) {
       return { redirectUrl: `${fallbackRedirect}?wechat_error=no_code` };
     }
@@ -177,6 +208,41 @@ export class AuthService {
       token: value.token,
       user: value.user,
     };
+  }
+
+  /** 开发环境专用：手动将某个 state 标记为已确认，方便本地联调 */
+  async devConfirmState(state: string): Promise<{ ok: boolean }> {
+    if (!state?.trim()) return { ok: false };
+    const isDevMock = process.env.WECHAT_DEV_MODE === 'true' || process.env.NODE_ENV !== 'production';
+    if (!isDevMock) return { ok: false };
+    const existing = this.wechatState.get(state);
+    if (!existing) return { ok: false };
+    if (existing.status === 'confirmed') return { ok: true };
+
+    const openId = `dev-openid-${state}`;
+    let user = await this.prisma.user.findUnique({
+      where: { wechat_open_id: openId },
+    });
+    if (!user) {
+      user = await this.prisma.user.create({
+        data: {
+          wechat_open_id: openId,
+          wechat_union_id: null,
+          nickname: '本地测试用户',
+          avatar_url: null,
+        },
+      });
+    }
+    const token = `wechat-dev-${randomUUID()}`;
+    const loginUser: LoginResponse['user'] = {
+      userId: user.id,
+      wechatOpenId: user.wechat_open_id,
+      nickname: user.nickname,
+      avatarUrl: user.avatar_url,
+      onboardingCompleted: user.onboarding_completed,
+    };
+    this.wechatState.setConfirmed(state, token, loginUser);
+    return { ok: true };
   }
 
   async wechatLogin(payload: WechatLoginPayload): Promise<AuthResult> {
