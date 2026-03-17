@@ -204,6 +204,15 @@ function Get-LanguageConventions {
     if ($Lang) { "${Lang}: Follow standard conventions" } else { 'General: Follow standard conventions' } 
 }
 
+# List capability names from openspec/specs/ for Cursor specify-rules.mdc (Speckit/OpenSpec sync).
+function Get-OpenSpecCapabilities {
+    param([string]$RepoRoot)
+    $specsDir = Join-Path $RepoRoot 'openspec/specs'
+    if (-not (Test-Path $specsDir)) { return @() }
+    $dirs = Get-ChildItem -Path $specsDir -Directory -ErrorAction SilentlyContinue
+    return @($dirs | ForEach-Object { $_.Name })
+}
+
 function New-AgentFile {
     param(
         [Parameter(Mandatory=$true)]
@@ -301,12 +310,32 @@ function Update-ExistingAgentFile {
     if ($techStack) { $newChangeEntry = "- ${CURRENT_BRANCH}: Added ${techStack}" }
     elseif ($NEW_DB -and $NEW_DB -notin @('N/A','NEEDS CLARIFICATION')) { $newChangeEntry = "- ${CURRENT_BRANCH}: Added ${NEW_DB}" }
 
+    $openSpecCaps = @()
+    if ($TargetFile -match '\.mdc$') { $openSpecCaps = Get-OpenSpecCapabilities -RepoRoot $REPO_ROOT }
+    $openSpecSectionAdded = $false
+    $inOpenSpecSection = $false
+
     $lines = Get-Content -LiteralPath $TargetFile -Encoding utf8
     $output = New-Object System.Collections.Generic.List[string]
     $inTech = $false; $inChanges = $false; $techAdded = $false; $changeAdded = $false; $existingChanges = 0
 
     for ($i=0; $i -lt $lines.Count; $i++) {
         $line = $lines[$i]
+        if ($line -eq '## Active Capabilities (openspec/specs/)') {
+            $inOpenSpecSection = $true
+            $output.Add($line)
+            continue
+        }
+        if ($inOpenSpecSection -and $line -match '^- ') {
+            if ($openSpecCaps.Count -gt 0) { $output.Add('- ' + ($openSpecCaps -join ', ')) } else { $output.Add($line) }
+            $inOpenSpecSection = $false
+            continue
+        }
+        if ($inOpenSpecSection) {
+            $output.Add($line)
+            if ($line -match '^##\s') { $inOpenSpecSection = $false }
+            continue
+        }
         if ($line -eq '## Active Technologies') {
             $output.Add($line)
             $inTech = $true
@@ -326,7 +355,17 @@ function Update-ExistingAgentFile {
             $inChanges = $true
             continue
         }
-        if ($inChanges -and $line -match '^##\s') { $output.Add($line); $inChanges = $false; continue }
+        if ($inChanges -and $line -match '^##\s') {
+            if (-not $openSpecSectionAdded -and $openSpecCaps.Count -gt 0) {
+                $output.Add('')
+                $output.Add('## Active Capabilities (openspec/specs/)')
+                $output.Add('')
+                $output.Add('- ' + ($openSpecCaps -join ', '))
+                $output.Add('')
+                $openSpecSectionAdded = $true
+            }
+            $output.Add($line); $inChanges = $false; continue
+        }
         if ($inChanges -and $line -match '^- ') {
             if ($existingChanges -lt 2) { $output.Add($line); $existingChanges++ }
             continue
@@ -341,6 +380,13 @@ function Update-ExistingAgentFile {
     # Post-loop check: if we're still in the Active Technologies section and haven't added new entries
     if ($inTech -and -not $techAdded -and $newTechEntries.Count -gt 0) {
         $newTechEntries | ForEach-Object { $output.Add($_) }
+    }
+    # If we left Recent Changes without seeing another ## (e.g. end of file), add OpenSpec capabilities section if needed
+    if ($inChanges -and -not $openSpecSectionAdded -and $openSpecCaps.Count -gt 0) {
+        $output.Add('')
+        $output.Add('## Active Capabilities (openspec/specs/)')
+        $output.Add('')
+        $output.Add('- ' + ($openSpecCaps -join ', '))
     }
 
     # Ensure Cursor .mdc files have YAML frontmatter for auto-inclusion

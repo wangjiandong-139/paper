@@ -1,13 +1,14 @@
----
+﻿---
 description: Project Development Guidelines
 globs: ["**/*"]
 alwaysApply: true
 ---
 # paper Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-03-16
+Auto-generated from all feature plans. Last updated: 2026-03-17
 
 ## Active Technologies
+- PostgreSQL（业务数据、配置、日志、模板元数据）+ Redis（admin session、运行时缓存、队列/配置失效广播） (001-admin-portal)
 
 - TypeScript 5.x（前端 Vue 3、后端 NestJS 10） + Vue 3, Vite, Pinia, TailwindCSS, NestJS, Prisma, PostgreSQL, Redis, BullMQ (001-admin-portal)
 
@@ -37,6 +38,7 @@ openspec/
 TypeScript 5.x（前端 Vue 3、后端 NestJS 10）: Follow standard conventions
 
 ## Recent Changes
+- 001-admin-portal: Added TypeScript 5.x（前端 Vue 3、后端 NestJS 10） + Vue 3, Vite, Pinia, TailwindCSS, NestJS, Prisma, PostgreSQL, Redis, BullMQ
 
 - 001-admin-portal: Added TypeScript 5.x（前端 Vue 3、后端 NestJS 10） + Vue 3, Vite, Pinia, TailwindCSS, NestJS, Prisma, PostgreSQL, Redis, BullMQ
 
