@@ -51,6 +51,11 @@ export class AuthService {
     return bcrypt.compare(plain, hash);
   }
 
+  /** PC 端扫码登录：获取二维码 URL。未接入微信开放平台时返回 null。 */
+  async getWechatQrcodeUrl(): Promise<{ url: string | null }> {
+    return { url: null };
+  }
+
   async wechatLogin(payload: WechatLoginPayload): Promise<AuthResult> {
     // 占位实现：实际实现将调用微信 OAuth 和数据库
     return {

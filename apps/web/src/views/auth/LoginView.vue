@@ -46,14 +46,15 @@
               alt="微信扫码登录"
               class="w-40 h-40 rounded-lg"
             />
-            <div v-else class="text-center">
+            <div v-else class="text-center px-2">
               <div class="text-gray-300 text-4xl mb-2">📷</div>
-              <p class="text-xs text-gray-400">二维码加载失败</p>
+              <p class="text-xs text-gray-400">暂未开启扫码登录</p>
+              <p class="text-xs text-gray-500 mt-1">请使用下方用户名密码登录</p>
               <button
                 class="text-xs text-[#07c160] mt-2 underline"
                 @click="refreshQrcode"
               >
-                刷新
+                重试
               </button>
             </div>
           </div>
@@ -210,9 +211,9 @@ onMounted(async () => {
     qrcodeLoading.value = true
     try {
       const { http } = await import('@/lib/http')
-      const { data } = await http.get<{ url: string }>('/auth/wechat/qrcode')
-      qrcodeUrl.value = data.url
-      startQrcodePolling()
+      const { data } = await http.get<{ url: string | null }>('/auth/wechat/qrcode')
+      qrcodeUrl.value = data?.url ?? null
+      if (qrcodeUrl.value) startQrcodePolling()
     } catch {
       qrcodeUrl.value = null
     } finally {
