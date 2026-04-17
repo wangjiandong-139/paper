@@ -6,22 +6,6 @@
     </div>
 
     <div class="px-4 pt-4 space-y-3">
-      <!-- 学科选择 -->
-      <div class="bg-white rounded-xl overflow-hidden">
-        <van-field
-          v-model="form.subject"
-          label="学科 / 方向"
-          placeholder="请选择学科"
-          readonly
-          is-link
-          required
-          :error="!!errors.subject"
-          :error-message="errors.subject"
-          data-testid="field-subject"
-          @click="showSubjectPicker = true"
-        />
-      </div>
-
       <!-- 论文标题 -->
       <div class="bg-white rounded-xl overflow-hidden">
         <van-field
@@ -36,7 +20,32 @@
         />
       </div>
 
-      <!-- 语言选择 -->
+      <!-- 专业（可手动输入 + 自动补全） -->
+      <div class="bg-white rounded-xl overflow-hidden">
+        <van-field
+          v-model="form.subject"
+          label="专业"
+          placeholder="请输入专业名称，例如：计算机科学与技术"
+          clearable
+          data-testid="field-major"
+          @keyup.enter="handleSubjectEnter"
+        />
+        <div v-if="subjectSuggestions.length" class="border-t border-gray-100 bg-gray-50">
+          <ul class="max-h-40 overflow-y-auto text-sm text-gray-700">
+            <li
+              v-for="(item, index) in subjectSuggestions"
+              :key="item"
+              class="px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-gray-100"
+              @click="handleSubjectSelect(item)"
+            >
+              <span>{{ item }}</span>
+              <span v-if="index === 0" class="text-[10px] text-gray-400">回车补全</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 论文语言 -->
       <div class="bg-white rounded-xl overflow-hidden">
         <van-field label="论文语言" required>
           <template #input>
@@ -121,9 +130,9 @@
       <!-- 格式模板（学校） -->
       <div class="bg-white rounded-xl overflow-hidden">
         <van-field
-          v-model="form.template_id"
+          :model-value="templateLabel"
           label="格式模板"
-          placeholder="国标 / 通用（默认）"
+          placeholder="输入学校名称搜索"
           readonly
           is-link
           data-testid="field-template"
@@ -131,11 +140,11 @@
         />
       </div>
 
-      <!-- AI 投喂（选填） -->
+      <!-- 关键词（选填） -->
       <div class="bg-white rounded-xl overflow-hidden">
         <van-field
           v-model="form.ai_feed"
-          label="AI 投喂"
+          label="关键词"
           type="textarea"
           :rows="3"
           placeholder="可输入研究思路、关键词、已有结论等（最多 1500 字，选填）"
@@ -143,7 +152,7 @@
           show-word-limit
           :error="!!errors.ai_feed"
           :error-message="errors.ai_feed"
-          data-testid="field-ai-feed"
+          data-testid="field-keywords"
           @blur="validateAiFeed"
         />
       </div>
@@ -163,17 +172,6 @@
         下一步
       </van-button>
     </div>
-
-    <!-- 学科选择器 -->
-    <van-popup v-model:show="showSubjectPicker" position="bottom" round>
-      <van-picker
-        :columns="subjectColumns"
-        @confirm="onSubjectConfirm"
-        @cancel="showSubjectPicker = false"
-        title="选择学科"
-        show-toolbar
-      />
-    </van-popup>
 
     <!-- 格式模板选择器（占位，后续接口集成） -->
     <van-popup v-model:show="showTemplatePicker" position="bottom" round>
@@ -208,7 +206,6 @@ import { validateStep1Form } from './step1-validation'
 const router = useRouter()
 const wizardStore = useWizardStore()
 const saving = ref(false)
-const showSubjectPicker = ref(false)
 const showTemplatePicker = ref(false)
 const wordCountInput = ref<number | string>('')
 
@@ -216,7 +213,7 @@ const wordCountInput = ref<number | string>('')
 
 const form = ref<Step1Data>({
   subject: '',
-  title: '',
+  title: '基于X射线衍射的晶体结构分析技术及其优化探讨',
   language: Language.ZH,
   degree_type: DegreeType.UNDERGRADUATE,
   word_count: 0,
@@ -236,21 +233,40 @@ const languageOptions = [
 ]
 
 const degreeOptions = [
-  { label: '本科', value: DegreeType.UNDERGRADUATE },
-  { label: '硕士', value: DegreeType.MASTER },
-  { label: '博士', value: DegreeType.DOCTOR },
-  { label: '其他', value: DegreeType.OTHER },
+  { label: '专科', value: DegreeType.UNDERGRADUATE },
+  { label: '本科', value: DegreeType.MASTER },
+  { label: '硕士', value: DegreeType.DOCTOR },
+  { label: '博士', value: DegreeType.OTHER },
 ]
-
-const subjectColumns = SUBJECTS.map((s) => ({ text: s, value: s }))
 
 const templateColumns = [
   { text: '国标 / 通用（默认）', value: 'default' },
 ]
 
+const templateLabel = computed(() => {
+  const found = templateColumns.find((item) => item.value === form.value.template_id)
+  return found ? found.text : ''
+})
+
 const wordCountOptions = computed(() => DEGREE_WORD_COUNT_OPTIONS[form.value.degree_type] ?? [])
 
 // ─── 事件处理 ──────────────────────────────────────────────────
+
+const subjectSuggestions = computed(() => {
+  const keyword = form.value.subject.trim()
+  if (keyword.length < 2) return []
+  const lower = keyword.toLowerCase()
+  return SUBJECTS.filter((item) => item.toLowerCase().includes(lower)).slice(0, 8)
+})
+
+function handleSubjectSelect(value: string): void {
+  form.value.subject = value
+}
+
+function handleSubjectEnter(): void {
+  if (!subjectSuggestions.value.length) return
+  form.value.subject = subjectSuggestions.value[0]
+}
 
 function handleDegreeChange(value: DegreeType): void {
   form.value.degree_type = value
@@ -272,27 +288,12 @@ function handleWordCountInput(val: string | number): void {
   }
 }
 
-function onSubjectConfirm(value: { selectedValues: string[] }): void {
-  form.value.subject = value.selectedValues[0] ?? ''
-  errors.value.subject = undefined
-  showSubjectPicker.value = false
-}
-
 function onTemplateConfirm(value: { selectedValues: string[] }): void {
   form.value.template_id = value.selectedValues[0] ?? 'default'
   showTemplatePicker.value = false
 }
 
 // ─── 校验函数 ──────────────────────────────────────────────────
-
-function validateSubject(): boolean {
-  if (!form.value.subject.trim()) {
-    errors.value.subject = '请选择学科'
-    return false
-  }
-  errors.value.subject = undefined
-  return true
-}
 
 function validateTitle(): boolean {
   if (!form.value.title.trim()) {

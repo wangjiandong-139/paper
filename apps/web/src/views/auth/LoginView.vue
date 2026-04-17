@@ -129,8 +129,8 @@ const qrcodeLoading = ref(false)
 const qrcodeUrl = ref<string | null>(null)
 const qrcodeState = ref<string | null>(null)
 const qrcodeExpired = ref(false)
-const username = ref('')
-const password = ref('')
+const username = ref('user')
+const password = ref('1')
 let pollingTimer: ReturnType<typeof setInterval> | null = null
 
 const isMobile = ref(false)

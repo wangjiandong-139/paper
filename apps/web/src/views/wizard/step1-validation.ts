@@ -6,9 +6,7 @@ export type Step1Errors = Partial<Record<keyof Step1Data, string>>
 export function validateStep1Form(formData: Step1Data): Step1Errors {
   const errors: Step1Errors = {}
 
-  if (!formData.subject?.trim()) {
-    errors.subject = '请选择学科'
-  }
+  // 学科 / 方向 改为选填，因此不再强制校验
 
   if (!formData.title?.trim()) {
     errors.title = '请输入论文标题'

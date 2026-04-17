@@ -117,10 +117,10 @@ export const SUBJECTS: string[] = [
 // ─── 学历对应字数建议 ──────────────────────────────────────────────────
 
 export const DEGREE_WORD_COUNT_OPTIONS: Record<DegreeType, number[]> = {
-  [DegreeType.UNDERGRADUATE]: [8000, 10000, 12000, 15000, 20000],
-  [DegreeType.MASTER]: [20000, 30000, 40000, 50000],
-  [DegreeType.DOCTOR]: [50000, 80000, 100000],
-  [DegreeType.OTHER]: [5000, 8000, 10000, 20000, 30000],
+  [DegreeType.UNDERGRADUATE]: [3000, 5000, 6000, 8000],
+  [DegreeType.MASTER]: [8000, 10000, 12000, 15000],
+  [DegreeType.DOCTOR]: [15000, 20000, 30000, 50000],
+  [DegreeType.OTHER]: [50000, 60000, 80000, 100000],
 }
 
 // ─── 校验常量 ──────────────────────────────────────────────────
