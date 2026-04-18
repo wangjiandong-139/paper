@@ -1,16 +1,16 @@
-﻿---
+---
 description: Project Development Guidelines
 globs: ["**/*"]
 alwaysApply: true
 ---
 # paper Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-03-17
+Last updated: 2026-04-18
 
 ## Active Technologies
-- PostgreSQL（业务数据、配置、日志、模板元数据）+ Redis（admin session、运行时缓存、队列/配置失效广播） (001-admin-portal)
+- PostgreSQL（业务数据、配置、日志、模板元数据）+ Redis（admin session、运行时缓存、队列/配置失效广播）
 
-- TypeScript 5.x（前端 Vue 3、后端 NestJS 10） + Vue 3, Vite, Pinia, TailwindCSS, NestJS, Prisma, PostgreSQL, Redis, BullMQ (001-admin-portal)
+- TypeScript 5.x（前端 Vue 3、后端 NestJS 10） + Vue 3, Vite, Pinia, TailwindCSS, NestJS, Prisma, PostgreSQL, Redis, BullMQ
 
 ## Project Structure
 
@@ -21,37 +21,15 @@ apps/
 └── server/
 packages/
 └── shared/
-specs/              # Speckit 功能规范（spec.md, plan.md, tasks.md）
-openspec/
-├── changes/        # OpenSpec 活跃变更
-└── specs/          # 主规范源（归档后同步）
 ```
 
 ## Commands
 
 - **Build/test/lint**: `pnpm --filter @ai-paper/server test; pnpm --filter @ai-paper/admin test; pnpm lint`
-- **Speckit**: `/speckit.specify` → `/speckit.clarify` → `/speckit.plan` → `/speckit.tasks` → implement（功能规范在 specs/）
-- **OpenSpec**: `/opsx:new` 新建变更，`/opsx:continue` 推进 artifact，`/opsx:apply` 实施，`/opsx:sync` 将 delta spec 同步到 openspec/specs/，`/opsx:archive` 归档
 
 ## Code Style
 
 TypeScript 5.x（前端 Vue 3、后端 NestJS 10）: Follow standard conventions
 
-## Recent Changes
-- 001-admin-portal: Added TypeScript 5.x（前端 Vue 3、后端 NestJS 10） + Vue 3, Vite, Pinia, TailwindCSS, NestJS, Prisma, PostgreSQL, Redis, BullMQ
-- 001-admin-portal: Added TypeScript 5.x（前端 Vue 3、后端 NestJS 10） + Vue 3, Vite, Pinia, TailwindCSS, NestJS, Prisma, PostgreSQL, Redis, BullMQ
-- 001-admin-portal: Added TypeScript 5.x（前端 Vue 3、后端 NestJS 10） + Vue 3, Vite, Pinia, TailwindCSS, NestJS, Prisma, PostgreSQL, Redis, BullMQ
-
-
-（Recent Changes 同时考虑 specs/ 下 feature 与 openspec/specs/ 下 capability 的变更。）
-
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
-
-## Active Capabilities (openspec/specs/)
-
-- admin-portal, ai-paper-writing
-
-## Active Capabilities (openspec/specs/)
-
-- admin-portal, ai-paper-writing
