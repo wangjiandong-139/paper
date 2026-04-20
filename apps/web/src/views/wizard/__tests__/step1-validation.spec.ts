@@ -21,14 +21,14 @@ describe('validateStep1Form', () => {
       expect(validateStep1Form(validForm())).toEqual({})
     })
 
-    it('subject 为空时报错', () => {
+    it('subject 为空时不报错（选填）', () => {
       const errs = validateStep1Form(validForm({ subject: '' }))
-      expect(errs.subject).toBe('请选择学科')
+      expect(errs.subject).toBeUndefined()
     })
 
-    it('subject 只有空白字符时报错', () => {
+    it('subject 只有空白字符时不报错（选填）', () => {
       const errs = validateStep1Form(validForm({ subject: '   ' }))
-      expect(errs.subject).toBe('请选择学科')
+      expect(errs.subject).toBeUndefined()
     })
 
     it('title 为空时报错', () => {
@@ -41,10 +41,10 @@ describe('validateStep1Form', () => {
       expect(errs.title).toBe('请输入论文标题')
     })
 
-    it('同时缺少 subject 和 title 时两者均报错', () => {
+    it('同时缺少 subject 和 title 时仅 title 报错', () => {
       const errs = validateStep1Form(validForm({ subject: '', title: '' }))
-      expect(errs.subject).toBeDefined()
-      expect(errs.title).toBeDefined()
+      expect(errs.subject).toBeUndefined()
+      expect(errs.title).toBe('请输入论文标题')
     })
   })
 
@@ -102,8 +102,8 @@ describe('validateStep1Form', () => {
       expect(isStep1Valid(validForm())).toBe(true)
     })
 
-    it('缺少 subject 返回 false', () => {
-      expect(isStep1Valid(validForm({ subject: '' }))).toBe(false)
+    it('缺少 subject 仍可返回 true（选填）', () => {
+      expect(isStep1Valid(validForm({ subject: '' }))).toBe(true)
     })
 
     it('字数超出范围返回 false', () => {
