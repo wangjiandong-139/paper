@@ -19,7 +19,6 @@ import {
   RetryOrderDto,
   UpdateOrderNoteDto,
   OrderExportQueryDto,
-  AdminOrderStatus,
 } from '@ai-paper/shared'
 import type { AdminSession } from '../admin-auth/admin-session.service'
 

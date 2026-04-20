@@ -1,4 +1,3 @@
-import fc from 'fast-check';
 import {
   ChapterStatus,
   DegreeType,

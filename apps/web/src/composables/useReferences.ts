@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
-import { ReferenceSource, DegreeType } from '@/types/wizard'
+import { DegreeType } from '@/types/wizard'
 import type { ReferenceItem } from '@/types/wizard'
 import { parseCitationText, getMinReferenceCount } from '@/utils/citation-parser'
 import type { ParsedCitationLine, CitationParseResult } from '@/utils/citation-parser'

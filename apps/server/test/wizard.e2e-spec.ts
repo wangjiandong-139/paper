@@ -67,7 +67,9 @@ describe('WizardModule / Drafts (e2e)', () => {
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
 
-    const found = (listAfterUpdates.body as any[]).find((d) => d.id === draftId);
+    const found = (listAfterUpdates.body as { id: string; step1_data?: unknown; step2_data?: unknown }[]).find(
+      (d) => d.id === draftId,
+    );
     expect(found).toBeDefined();
     expect(found.step1_data).toEqual(step1Payload);
     expect(found.step2_data).toEqual(step2Payload);
@@ -82,7 +84,7 @@ describe('WizardModule / Drafts (e2e)', () => {
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
 
-    const deletedFound = (listAfterDelete.body as any[]).find((d) => d.id === draftId);
+    const deletedFound = (listAfterDelete.body as { id: string }[]).find((d) => d.id === draftId);
     expect(deletedFound).toBeUndefined();
   });
 }

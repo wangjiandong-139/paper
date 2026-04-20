@@ -1,7 +1,7 @@
 /**
  * Order List Component Tests - TDD (must fail before implementation)
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { AdminOrderStatus } from '@ai-paper/shared'
 
 describe('OrderListView', () => {

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { ref } from 'vue'
 import { useReferences } from '../useReferences'
 import { DegreeType, ReferenceSource } from '@/types/wizard'

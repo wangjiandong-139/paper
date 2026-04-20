@@ -104,7 +104,7 @@ export class GenerationWorkerService {
     });
     const systemPrompt = buildGenerationSystemPrompt();
 
-    let lastError: Error | undefined;
+    let _lastError: Error | undefined;
     for (let attempt = 0; attempt <= GenerationWorkerService.MAX_RETRIES; attempt++) {
       try {
         const content = await this.aiAdapter.completion(userPrompt, systemPrompt);
@@ -117,7 +117,7 @@ export class GenerationWorkerService {
           status: ChapterStatus.DONE,
         };
       } catch (err) {
-        lastError = err instanceof Error ? err : new Error(String(err));
+        _lastError = err instanceof Error ? err : new Error(String(err));
       }
     }
 

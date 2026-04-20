@@ -1,7 +1,7 @@
 /**
  * Admin Templates Contract Tests - TDD (must fail before implementation)
  */
-import { SchoolTemplateStatus, DegreeType, TemplateRequestStatus } from '@ai-paper/shared'
+import { SchoolTemplateStatus, TemplateRequestStatus } from '@ai-paper/shared'
 
 describe('Admin Templates API Contract', () => {
   describe('GET /api/admin/school-templates', () => {

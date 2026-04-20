@@ -1,7 +1,7 @@
 /**
  * Order Detail Component Tests - TDD
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 
 describe('GenerationJobLogPanel', () => {
   it('should render event log timeline in chronological order', () => {

@@ -9,7 +9,6 @@ async function bootstrap() {
 
 // 仅用于本地手动启动，测试通过 Nest 测试工具创建应用实例
 if (require.main === module) {
-  // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  bootstrap();
+  void bootstrap();
 }
 

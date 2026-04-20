@@ -14,6 +14,7 @@ describe('DashboardOverviewView', () => {
     const ranges = ['day', 'week', 'month']
     let activeRange = 'week'
     activeRange = 'month'
+    expect(ranges).toContain(activeRange)
     expect(activeRange).toBe('month')
   })
 })

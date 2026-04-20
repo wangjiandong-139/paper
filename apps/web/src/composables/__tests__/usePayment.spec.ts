@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { ref } from 'vue'
 import { isWechatBrowser, invokeWechatJsapi, usePayment } from '@/composables/usePayment'
-import { useOrderStore } from '@/stores/order'
 import { OrderStatus, PlanType } from '@/types/order'
 import type { WechatJsapiPayParams, CreateOrderResponseDTO, OrderDTO } from '@/types/order'
 
