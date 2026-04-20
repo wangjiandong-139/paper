@@ -124,7 +124,7 @@ describe('useOutlineEditor', () => {
     })
 
     it('togglePlaceholder 添加占位标记', () => {
-      const { outline, setOutline, togglePlaceholder, placeholderCounts } = createEditor()
+      const { setOutline, togglePlaceholder, placeholderCounts } = createEditor()
       setOutline(sampleOutline())
       togglePlaceholder('c1', 'figure')
       expect(placeholderCounts.value.figure).toBe(1)

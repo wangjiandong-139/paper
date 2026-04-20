@@ -1,8 +1,6 @@
 /**
  * Admin Config Contract Tests - TDD
  */
-import { ApiConfigType } from '@ai-paper/shared'
-
 describe('Admin Config API Contract', () => {
   describe('GET /api/admin/configs/api', () => {
     it('should return list of API configs with masked secrets', () => {

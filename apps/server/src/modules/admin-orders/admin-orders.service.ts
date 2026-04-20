@@ -1,9 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { randomUUID } from 'crypto'
 import {
   AdminOrderStatus,
   GenerationJobStatus,
-  GenerationJobTriggerSource,
   AdminOrderListQueryDto,
   AdminOrderListItemDto,
   AdminOrderDetailDto,
@@ -11,16 +9,6 @@ import {
   PaginatedDto,
 } from '@ai-paper/shared'
 import { AdminOperationLogService } from '../admin-logs/admin-operation-log.service'
-
-const OVERDUE_THRESHOLD_MS = 2 * 60 * 60 * 1000
-
-function isJobOverdue(job: { status: GenerationJobStatus; startedAt: Date | null }): boolean {
-  return (
-    job.status === GenerationJobStatus.RUNNING &&
-    job.startedAt !== null &&
-    Date.now() - job.startedAt.getTime() > OVERDUE_THRESHOLD_MS
-  )
-}
 
 @Injectable()
 export class AdminOrdersService {

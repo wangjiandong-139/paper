@@ -5,7 +5,7 @@
  * 达到上限返回 403、引用核对可追溯/不可追溯识别。
  */
 import { ForbiddenException } from '@nestjs/common';
-import { OrderStatus, PlanType, RevisionType } from '../../../packages/shared/src/enums';
+import { PlanType, RevisionType } from '../../../packages/shared/src/enums';
 import { ReferenceItem } from '../../../packages/shared/src/types';
 import { IAiAdapter } from '../src/adapters/ai/ai.adapter.interface';
 import { OrderService } from '../src/modules/order/order.service';
@@ -33,21 +33,6 @@ function makeAiAdapter(chunks: string[] = ['revised content']): jest.Mocked<IAiA
     completion: jest.fn().mockResolvedValue(chunks.join('')),
     streamCompletion: jest.fn().mockReturnValue(mockStream()),
   } as unknown as jest.Mocked<IAiAdapter>;
-}
-
-async function setupOrderInGenerating(orderSvc: OrderService) {
-  const { orderId } = await orderSvc.createOrder(USER_A, { draftId: 'draft-1', planType: PlanType.BASIC });
-  // Manually set to GENERATING (simulating payment callback)
-  await orderSvc.handleWechatNotify({
-    timestamp: 't', nonce: 'n', body: '{}', signature: 'sig',
-  });
-  // Directly mark GENERATING via adapter mock
-  const adapter = makePaymentAdapter();
-  adapter.decryptNotifyResource = jest.fn().mockResolvedValue({ out_trade_no: orderId, amount: { total: 9900 }, trade_state: 'SUCCESS' });
-  const svc2 = new OrderService(adapter);
-  const { orderId: oid2 } = await svc2.createOrder(USER_A, { draftId: 'draft-1', planType: PlanType.BASIC });
-  await svc2.handleWechatNotify({ timestamp: 't', nonce: 'n', body: '{}', signature: 'sig' });
-  return { orderSvc: svc2, orderId: oid2 };
 }
 
 function makeServices(aiChunks?: string[]) {

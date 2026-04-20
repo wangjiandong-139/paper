@@ -48,7 +48,7 @@ export interface OrderDetailDTO extends OrderSummaryDTO {
   generation_progress?: GenerationProgressEvent;
 }
 
-export interface ReferenceDTO extends ReferenceItem {}
+export type ReferenceDTO = ReferenceItem;
 
 export interface ParseErrorDTO {
   line: number;

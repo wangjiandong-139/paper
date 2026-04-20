@@ -1,7 +1,7 @@
 /**
  * Admin Auth Contract Tests - TDD
  */
-import { AdminRole, AdminUserStatus } from '@ai-paper/shared'
+import { AdminRole } from '@ai-paper/shared'
 
 describe('Admin Auth API Contract', () => {
   describe('POST /api/admin/auth/login', () => {
