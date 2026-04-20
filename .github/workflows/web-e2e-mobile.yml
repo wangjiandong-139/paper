@@ -1,0 +1,45 @@
+name: Web E2E (Playwright mobile)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/web/**'
+      - '.github/workflows/web-e2e-mobile.yml'
+  pull_request:
+    paths:
+      - 'apps/web/**'
+      - '.github/workflows/web-e2e-mobile.yml'
+
+concurrency:
+  group: web-e2e-mobile-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright (WebKit — iPhone 14 project)
+        run: pnpm --filter @ai-paper/web exec playwright install --with-deps webkit
+
+      - name: Run mobile E2E
+        working-directory: apps/web
+        env:
+          CI: 'true'
+        run: pnpm run test:e2e:mobile

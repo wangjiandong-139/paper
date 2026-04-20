@@ -1,3 +1,5 @@
+.worktrees/
+
 node_modules/
 node_modules/.pnpm/
 apps/server/.env
